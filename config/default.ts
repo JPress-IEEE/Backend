@@ -9,5 +9,5 @@ export default{
     refreshTokenTTL: process.env.REFRESH_KEY_TTL || "1y",
     salt: process.env.SALT_WORK_FACTOR || 10,
     nodeEnv: process.env.NODE_ENV ,
-    sessionSecret: process.env.SESSION_SECRET ||,
+    sessionSecret: process.env.SESSION_SECRET ,
 }
