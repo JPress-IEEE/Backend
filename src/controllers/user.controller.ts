@@ -22,7 +22,7 @@ export const createUserController = async (req: Request, res: Response) => {
             profilePic: validatedData.profilePic || ''
         };
         const newUser = await createUser(user as IUser);
-        const userId: string = (newUser._id).toString() as string;
+        const userId: string = (newUser._id as string).toString();
         const refreshToken = newUser.refreshToken;
 
         res.cookie('refreshToken', refreshToken, {
@@ -81,7 +81,7 @@ export const loginController = async (req: Request, res: Response) => {
         if (!isMatch) {
             return res.status(400).send({ message: 'Invalid email or password' });
         }
-        const userId = (user._id).toString() as string;
+        const userId = (user._id as string).toString();
         const accessToken = generateToken(userId);
         const refreshToken = generateRefreshToken(userId);
         user.refreshToken = refreshToken;
@@ -127,9 +127,9 @@ export const refreshTokenController = async (req: Request, res: Response) => {
 
 export const passport_Auth = async (req: Request, res: Response) => {
     let user: IUser = req.user as IUser;
-    const accessToken = generateToken(user._id.toString());
-    const refreshToken = generateRefreshToken(user._id.toString());
-    await updateUser(user._id.toString(), { refreshToken });
+    const accessToken = generateToken((user._id as string).toString());
+    const refreshToken = generateRefreshToken((user._id as string).toString());
+    await updateUser((user._id as string).toString(), { refreshToken });
 
     res.cookie('refreshToken', refreshToken, {
         httpOnly: true,

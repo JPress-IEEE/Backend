@@ -24,7 +24,7 @@ passport.use(new GoogleStrategy({
 
             if (!user) {
                 user = await User.findOne({ email });
-                const refreshToken = generateRefreshToken(user?._id);
+                const refreshToken = generateRefreshToken(user?._id as string);
                 if (user) {
                     user.google_id = google_id;
                     user.refreshToken = refreshToken ;
@@ -70,7 +70,7 @@ passport.use(new FacebookStrategy({
 
             if (!user) {
                 user = await User.findOne({ email });
-                const refreshToken = generateRefreshToken(user?._id);
+                const refreshToken = generateRefreshToken(user?._id as string);
                 if (user) {
                     user.facebook_id = facebook_id;
                     user.refreshToken = refreshToken;
@@ -116,7 +116,7 @@ passport.use(new LinkedinStrategy({
 
             if (!user) {
                 user = await User.findOne({ email });
-                const refreshToken = generateRefreshToken(user?._id);
+                const refreshToken = generateRefreshToken(user?._id as string);
                 if (user) {
                     user.linkedin_id = linkedin_id;
                     user.refreshToken = refreshToken;
