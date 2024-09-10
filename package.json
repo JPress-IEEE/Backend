@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node dis/index.js",
+    "start": "nodemon dis/src/index.js",
     "build": "tsc",
     "dev": "nodemon src/index.ts",
     "test": "jest --watchAll"
