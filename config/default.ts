@@ -1,4 +1,6 @@
 import { session } from "passport";
+import dotenv from "dotenv";
+dotenv.config()
 
 export default{
     privateKey: process.env.PRIVATE_KEY || '',
