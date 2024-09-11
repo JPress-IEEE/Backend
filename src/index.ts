@@ -2,10 +2,12 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import expressRateLimit from 'express-rate-limit';
-import { dbConnect ,dbDisconnect} from './DBConfig/db.config';
+import { dbConnect, dbDisconnect } from './DBConfig/db.config';
 import userRouter from './routes/user.route';
 import passport from './utils/passport.utils';
 import session from 'express-session';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
 dbConnect();
@@ -21,16 +23,16 @@ app.use(session({
 }));
 
 app.use(expressRateLimit({
-    windowMs: 15 * 60 * 1000, 
+    windowMs: 15 * 60 * 1000,
     max: 100
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use('/api/auth', userRouter);   
+app.use('/api/auth', userRouter);
 
-const server = app.listen(3000, () => {
+const server = app.listen(process.env.PORT ||3000, () => {
     console.log('Server is running on port 3000');
 });
 
