@@ -9,8 +9,6 @@ export interface IApplicant extends mongoose.Document {
     location: string,
     summary: string,
     jobName: string,
-    bookmarks: IOffer['_id'][],
-    isBookmarked: boolean,
     payoutAccountId: string,
 }
 
