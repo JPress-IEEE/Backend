@@ -9,6 +9,7 @@ import passport from './utils/passport.utils';
 import session from 'express-session';
 import dotenv from 'dotenv';
 import { Server } from 'socket.io';
+import { swaggerUi,swaggerDocs } from './swagger';
 dotenv.config();
 
 const app = express();
@@ -34,6 +35,7 @@ app.use(expressRateLimit({
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use('/api/auth', userRouter);
 
 const serverListen = server.listen(process.env.PORT ||3000, () => {
