@@ -4,46 +4,42 @@ Welcome to the JPress repository! This project provides backend services for a j
 
 ## Features
 
-- **User Management**: Manages different roles for clients and applicants.
-- **Chat System**: Facilitates one-on-one messaging and video calls between users.
-- **Notifications**: Delivers real-time updates and alerts.
-- **Service Requests & Offers**: Lets clients post requests and view offers from applicants.
-- **Recommendations**: Suggests applicants based on specific requests.
-- **Feedback System**: Allows clients to rate and review service providers.
+- **User Management**: Manage roles for clients and applicants.
+- **Chat System**: One-on-one messaging and video calls between users.
+- **Notifications**: Real-time updates and alerts.
+- **Service Requests & Offers**: Clients post requests and view offers from applicants.
+- **Recommendations**: Suggest applicants based on requests.
+- **Feedback System**: Clients rate and review service providers.
 
 ## Technology Stack
 
-- **Language**: TypeScript / Node.js / JavaScript
+- **Languages**: TypeScript / Node.js / JavaScript
 - **Database**: MongoDB
 - **Framework**: Express
-- **Other Tools**: Swagger for API documentation, Jest for unit testing, Socket.io, Passport, JWT, etc.
+- **Tools**: Swagger (API docs), Jest (unit testing), Socket.io, Passport, JWT
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js / NPM
-- A running instance of MongoDB
+- MongoDB instance
 
 ### Installation
 
-1. **Clone the Repository:**
-
+1. **Clone the Repository**:
     ```bash
     git clone https://github.com/JPress-IEEE/Backend.git
     cd Backend
     ```
 
-2. **Install Dependencies:**
-
+2. **Install Dependencies**:
     ```bash
     npm install
     ```
 
-3. **Set Up Environment Variables:**
-
-    Create a `.env` file in the root directory and add the following environment variables:
-
+3. **Set Up Environment Variables**:  
+   Create a `.env` file with:
     ```plaintext
     MONGO_URI=
     PUBLIC_KEY=""
@@ -65,66 +61,49 @@ Welcome to the JPress repository! This project provides backend services for a j
     SESSION_SECRET=
     ```
 
-    Replace the placeholders with your actual configuration values.
-
-4. **Start the Server:**
-
+4. **Build and Start the Server**:
     ```bash
+    npm run build
     npm run start
     ```
 
-5. **Testing:**
+### Testing
 
-    To ensure that JPress functions correctly and to maintain code quality, we use Jest for unit testing. Follow these steps to run and manage tests:
+- **Run All Tests**:
+    ```bash
+    npm run test
+    ```
 
-    - **Running Tests:** To run all unit tests, execute the following command:
+- **Run Specific Tests**:
+    ```bash
+    npm test -- <path-to-test-file>
+    ```
 
-      ```bash
-      npm run test
-      ```
+- **Test Coverage Report**:
+    ```bash
+    npm run test:coverage
+    ```
 
-    - **Running Specific Tests:** To run a specific test file or test suite, specify the file name:
-
-      ```bash
-      npm test -- <path-to-test-file>
-      ```
-
-    - **Coverage Report:** To generate a test coverage report, use:
-
-      ```bash
-      npm run test:coverage
-      ```
-
-    - **Writing Tests:** Place test files in the `__tests__` directory or name them with a `.test.js` or `.spec.js` suffix.
-
-    - **Debugging Tests:** Run Jest in watch mode to debug failing tests:
-
-      ```bash
-      npm test -- --watch
-      ```
-
-
+- **Debugging (Watch Mode)**:
+    ```bash
+    npm test -- --watch
+    ```
 
 ### API Documentation
 
-API documentation is provided using Swagger. Access it at:
+Access Swagger documentation at:
 
 [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
 
-Swagger offers interactive documentation to explore and test API endpoints.
-
 ## Contributing
 
-We welcome contributions to JPress! To contribute:
+We welcome contributions to JPress:
 
-1. **Fork the Repository:** Create a personal copy of the repository on GitHub.
-2. **Create a Branch:** Develop your feature or fix in a new branch.
-3. **Commit Your Changes:** Ensure your changes are well-documented in your commit messages.
-4. **Submit a Pull Request:** Open a pull request with a clear description of your changes.
-
-
+1. **Fork the Repository**: Create a personal copy on GitHub.
+2. **Create a Branch**: Develop features or fixes in a new branch.
+3. **Commit Changes**: Write clear and detailed commit messages.
+4. **Submit a Pull Request**: Provide a clear description of the changes.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
