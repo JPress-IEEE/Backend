@@ -1,30 +1,53 @@
 import multer from 'multer';
 import path from 'path';
 
-const storage = multer.diskStorage({
+const profilePicStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/profile-pics/'); 
+        cb(null, 'uploads/profile-pics/');
     },
     filename: (req, file, cb) => {
-        const filename = `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`;
-        const filePath = filename.replace(/\\/g, '/');
-        cb(null, filePath);
+        const filename = `profile-pic-${Date.now()}${path.extname(file.originalname)}`;
+        cb(null, filename);
     },
 });
 
-const upload = multer({
-    storage,
+const resumeStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/resumes/');
+    },
+    filename: (req, file, cb) => {
+        const filename = `resume-${Date.now()}${path.extname(file.originalname)}`;
+        cb(null, filename);
+    },
+});
+const profilePicUpload = multer({
+    storage: profilePicStorage,
     fileFilter: (req, file, cb) => {
-        const allowedTypes = /jpeg|jpg|png|gif/; 
+        const allowedTypes = /jpeg|jpg|png/;
         const ext = path.extname(file.originalname).toLowerCase();
         const mimeType = allowedTypes.test(file.mimetype);
 
         if (mimeType && allowedTypes.test(ext)) {
-            return cb(null, true); 
+            return cb(null, true);
         }
-        cb(new Error('Only images are allowed')); 
+        cb(new Error('Only image files are allowed.'));
     },
     limits: { fileSize: 1024 * 1024 * 5 } 
 });
 
-export default upload;
+const resumeUpload = multer({
+    storage: resumeStorage,
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = /pdf|doc|docx/;
+        const ext = path.extname(file.originalname).toLowerCase();
+        const mimeType = allowedTypes.test(file.mimetype);
+
+        if (mimeType && allowedTypes.test(ext)) {
+            return cb(null, true);
+        }
+        cb(new Error('Only PDF, DOC, and DOCX files are allowed.'));
+    },
+    limits: { fileSize: 1024 * 1024 * 10 } 
+});
+
+export { profilePicUpload, resumeUpload };
