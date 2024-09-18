@@ -6,6 +6,8 @@ import { Strategy as LinkedinStrategy } from 'passport-linkedin-oauth2';
 import { getUserByEmail, createUser } from '../services/user.services';
 import { IUser, User } from '../models/user.model';
 import { generateRefreshToken } from './jwt.utils';
+import dotenv from 'dotenv';
+dotenv.config();
 
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID!,
