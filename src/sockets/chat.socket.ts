@@ -7,13 +7,20 @@ const handleChatSockets = (io: Server) => {
 
     socket.on("joinChat", (chatId: string) => {
       socket.join(chatId);
+      console.log(`user ${socket.id} joined chat room: ${chatId}`);
     });
 
-    socket.on("sendMessage", async (chatId: string, senderId: string, content: string) => {
+    socket.on("sendMessage", async (chatId: string, senderId: string, content: string, callback) => {
       try {
+        console.log(`User ${socket.id} is sending message to chat ${chatId}`);
+
         const message = await messageService.createMessage(chatId, senderId, content);
         io.to(chatId).emit("receiveMessage", message);
+        console.log(`Message sent successfully to chat ${chatId}: `, message);
+
+        callback({ status: "success", message });
       } catch (error: any) {
+        console.error(`Error sending message in chat ${chatId}: `, error.message);
         socket.emit("errorMessage", error.message);
       }
     });
