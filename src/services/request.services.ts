@@ -24,20 +24,20 @@ export const getRequestById = async (requestId: string): Promise<IRequest | null
     }
 };
 
-export const getRequests = async (queryString: string): Promise<IRequest[]> => {
+export const getRequests = async (query: any): Promise<IRequest[]> => {
     try {
-        const features = new APIFeatures(Request.find(), queryString)
+        const features = new APIFeatures(Request.find(), query)
             .filter()
             .sort()
             .limitFields()
             .paginate();
         const result = await features.query;
         return result;
-    }
-    catch (err: any) {
+    } catch (err: any) {
         throw err;
     }
 };
+
 
 export const updateRequest = async (requestId: string, request: IRequest): Promise<IRequest | null> => {
     try {
