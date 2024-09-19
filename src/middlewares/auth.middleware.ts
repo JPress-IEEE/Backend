@@ -51,6 +51,7 @@ export const clientRoleoleMiddleware = async (req: Request, res: Response, next:
 };
 
 export const applicantRoleMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+
     try {
         const accessToken = req.headers.authorization?.split(' ')[1];
         if (!accessToken) {

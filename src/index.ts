@@ -8,6 +8,7 @@ import userRouter from './routes/user.route';
 import applicantRouter from './routes/applicant.route';
 import clientRouter from './routes/client.route';
 import requestRouter from './routes/request.route';
+import offerRouter from './routes/offer.route';
 import passport from './utils/passport.utils';
 import session from 'express-session';
 import { zodErrorHandler } from './middlewares/zodErrorHandler';
@@ -46,6 +47,7 @@ app.use('/api/auth', userRouter);
 app.use('/api/applicant', applicantRouter);
 app.use('/api/client', clientRouter);
 app.use('/api/request', requestRouter);
+app.use('/api/offer', offerRouter);
 
 app.use(zodErrorHandler);
 app.use(multerErrorHandler);
