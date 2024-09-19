@@ -5,6 +5,7 @@ import {getApplicantByUserId } from './applicant.services';
 import axios from "axios";
 import Request from "../models/request.model";
 import Applicant from "../models/applicant.model";
+import { json } from "stream/consumers";
 
 const apiUrl = 'http://localhost:5000';
 
@@ -76,20 +77,24 @@ export const storeData = async (email:string, description:string) => {
       throw new Error('Failed to store data');
     }
   };
-
-  export const updateData = async (email:string, description:string) => {
+  export const updateData = async (email: string, description: string) => {
     try {
       const data = {
-        email,
-        description,
+        "email": email,
+        "description": description,
       };
-      const response = await axios.post(`${apiUrl}/update`, data);
-      return response.data; 
-    } catch (error:any) {
+      const response = await axios.post(`${apiUrl}/update`, data, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      console.log(response.data);
+    } catch (error: any) {
       console.error('Error updating data in Flask API:', error.message);
       throw new Error('Failed to update data');
     }
   };
+  
 
   export const deleteData = async (email:string) => {
     try {
