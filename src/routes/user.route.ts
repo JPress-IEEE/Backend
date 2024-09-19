@@ -1,4 +1,4 @@
-import upload from "../utils/upload.utils";
+import {profilePicUpload} from "../utils/upload.utils";
 import {createUserController,loginController,logoutController,refreshTokenController,confirmEmail,passport_Auth} from '../controllers/user.controller';
 import express from 'express';
 import passport from 'passport';
@@ -6,7 +6,7 @@ import passport from 'passport';
 
 const userRouter = express.Router();
 
-userRouter.post('/signup',upload.single('profilePic'),createUserController);
+userRouter.post('/signup',profilePicUpload.single('profilePic'),createUserController);
 userRouter.post('/login',loginController);
 userRouter.post('/logout',logoutController);
 userRouter.post('/refresh-token',refreshTokenController);
