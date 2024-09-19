@@ -17,6 +17,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
         if (!user) {
             return res.status(401).send({ message: 'User not found' });
         }
+        req.body.userId = userId;
         next();
     }
     catch (err) {
@@ -61,6 +62,7 @@ export const applicantRoleMiddleware = async (req: Request, res: Response, next:
             [x: string]: any; userId: string
         };
         const userId: string = decoded.user.id as string;
+        console.log(userId);
         const user = await getUserById(userId);
         if (!user) {
             return res.status(401).send({ message: 'User not found' });
