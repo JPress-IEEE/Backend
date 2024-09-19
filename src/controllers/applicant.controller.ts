@@ -3,6 +3,8 @@ import * as applicantServices from '../services/applicant.services';
 import { IApplicant } from '../models/applicant.model';
 import {ApplicantSchema} from '../schemas/applicant.schema';
 import { userSchema } from '../schemas/user.schema';
+import {storeData,updateData,deleteData} from '../services/recommendation.services';
+import {getEmailByApplicantId} from '../services/applicant.services';
 
 export const getApplicants = async (req: Request, res: Response,next:NextFunction) => {
     try {
@@ -60,6 +62,10 @@ export const updateApplicant = async (req: Request, res: Response , next:NextFun
         const applicant = req.body as IApplicant;
         const result = await ApplicantSchema.parseAsync(applicant) as IApplicant;
         const updatedApplicant = await applicantServices.updateApplicant(id, result);
+        const email = await getEmailByApplicantId(id);
+        if(updatedApplicant && email){
+            await updateData(email,updatedApplicant.summary);
+        }
         res.status(200).send(updatedApplicant);
     } catch (error) {
         next(error);
@@ -76,6 +82,12 @@ export const deleteApplicant = async (req: Request, res: Response, next: NextFun
         if(id !==applicantId){
             res.status(401).json({ message: 'Unauthorized' });
             return;
+        }
+        const email = await getEmailByApplicantId(id);
+        if (email) {
+            await deleteData(email);
+        } else {
+            return res.status(400).json({ error: 'Email is required to delete data.' });
         }
         const deletedApplicant = await applicantServices.deleteApplicant(id);
         if (!deletedApplicant) {

@@ -131,3 +131,20 @@ export const getApplicantByPayoutAccountId = async (payoutAccountId: string): Pr
         throw err.message;
     }
 }
+
+export const getEmailByApplicantId = async (applicantId: string): Promise<string | null> => {
+    try {
+        const applicant = await Applicant.findById(applicantId);
+        if (!applicant) {
+            throw new Error('Applicant not found');
+        }
+        const user = await User.findById(applicant.userId);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        return user.email;
+    }
+    catch (err: any) {
+        throw err.message;
+    }
+};
