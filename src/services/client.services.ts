@@ -80,3 +80,13 @@ export const getClientByUser = async(userId :string)=>{
         throw err.message;
     }
 }
+export const getUserByClient = async (clientId: string) => {
+    try {
+        const client = await Client.findById(clientId);
+        const userId = client?.userId;
+        return userId;
+    }
+    catch (err: any) {
+        throw err.message;
+    }
+};
