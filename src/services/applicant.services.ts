@@ -80,20 +80,32 @@ export const uploadResume = async (applicantId: string, resume: string): Promise
     }
 };
 
-export const uploadProfilePic = async (applicantId: string, profilePic: string): Promise<IUser | null> => {
+export const uploadProfilePic = async (applicantId: string, profilePic: string) => {
     try {
-        const userId = await Applicant.findById(applicantId);
-        const result = await User.findByIdAndUpdate(userId?.userId as IUser["_id"], { profilePic }, { new: true });
-        return result;
-    }
-    catch (err: any) {
-        throw err.message;
+        const applicant = await Applicant.findById(applicantId);
+        if (!applicant) {
+            throw new Error('Applicant not found.');
+        }
+        let updatedUser = await User.findByIdAndUpdate(
+            applicant.userId as IUser["_id"],
+            { profilePic },
+            { new: true } 
+        );
+        if (!updatedUser) {
+            throw new Error('User not found or update failed.');
+        }
+       return updatedUser;
+        
+    } catch (err: any) {
+        console.error(err);
+        throw new Error(err.message || 'An error occurred while uploading the profile picture.');
     }
 };
 
+
 export const getApplicantByUserId = async (userId: string): Promise<IApplicant | null> => {
     try {
-        const result = await Applicant.findOne({ userId });
+        const result = await Applicant.findOne({ userId});
         return result;
     }
     catch (err: any) {

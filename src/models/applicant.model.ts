@@ -36,7 +36,7 @@ const ApplicantSchema = new mongoose.Schema({
     },
     payoutAccountId: {
         type: String,
-        required: true
+        required: false
     }
 });
 
