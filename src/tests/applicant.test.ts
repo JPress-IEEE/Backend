@@ -1,5 +1,5 @@
 import request from "supertest";
-import express from "express";
+import express, { NextFunction, Request } from "express";
 import applicantRouter from "../routes/applicant.route";
 import * as applicantServices from "../services/applicant.services";
 import { ApplicantSchema } from "../schemas/applicant.schema";
@@ -10,6 +10,10 @@ import * as APIFeatures from "../utils/APIFeatures.utils";
 import { authMiddleware,applicantRoleMiddleware,adminRoleMiddleware} from "../middlewares/auth.middleware";
 import { updateData ,deleteData} from "../services/recommendation.services";
 import { getEmailByApplicantId } from "../services/applicant.services";
+import fs from 'fs';
+import path from 'path';
+import mongoose from "mongoose";
+
 
 jest.mock("../services/applicant.services", () => ({
     getApplicants: jest.fn(),
@@ -22,6 +26,7 @@ jest.mock("../services/applicant.services", () => ({
     searchApplicants: jest.fn(),
     filterApplicants: jest.fn(),
     getEmailByApplicantId: jest.fn(),
+    getApplicantByUserId: jest.fn(),
 }));
 
 jest.mock("../middlewares/auth.middleware", () => ({
@@ -74,7 +79,7 @@ describe("applicant routes", ()=>{
                     jobName: "jobName",
                 },
             ];
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());  
             (adminRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (applicantServices.getApplicants as jest.Mock).mockResolvedValue(applicants);
             const response = await request(app).get("/api/applicant");
@@ -100,6 +105,7 @@ describe("applicant routes", ()=>{
                 jobName: "jobName",
             };
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (applicantServices.getApplicantByUserId as jest.Mock).mockResolvedValue(applicant);  
             (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
                 req.body.userId = "1";
                 next();
@@ -110,6 +116,15 @@ describe("applicant routes", ()=>{
             expect(response.body).toEqual(applicant);
         });
         it("should return 500 if getApplicantById throws an error", async ()=>{
+            const applicant = {
+                _id: "1",
+                userId: "1",
+                resume: "resume",
+                location: "location",
+                summary: "description",
+                jobName: "jobName",
+            };
+            (applicantServices.getApplicantByUserId as jest.Mock).mockResolvedValue(applicant);  
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
                 req.body.userId = "1";
@@ -130,6 +145,7 @@ describe("applicant routes", ()=>{
                 summary: "description",
                 jobName: "jobName",
             };
+            (applicantServices.getApplicantByUserId as jest.Mock).mockResolvedValue(applicant); 
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
                 req.body.userId = "1";
@@ -142,6 +158,15 @@ describe("applicant routes", ()=>{
             expect(response.body).toEqual(applicant);
         });
         it("should return 500 if createApplicant throws an error", async ()=>{
+            const applicant = {
+                _id: "1",
+                userId: "1",
+                resume: "resume",
+                location: "location",
+                summary: "description",
+                jobName: "jobName",
+            };
+            (applicantServices.getApplicantByUserId as jest.Mock).mockResolvedValue(applicant); 
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
                 req.body.userId = "1";
@@ -163,6 +188,7 @@ describe("applicant routes", ()=>{
                 summary: "description",
                 jobName: "jobName",
             };
+            (applicantServices.getApplicantByUserId as jest.Mock).mockResolvedValue(applicant); 
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
                 req.body.userId = "1";
@@ -199,6 +225,7 @@ describe("applicant routes", ()=>{
                 summary: "description",
                 jobName: "jobName",
             };
+            (applicantServices.getApplicantByUserId as jest.Mock).mockResolvedValue(applicant); 
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
                 req.body.userId = "1";
@@ -225,36 +252,60 @@ describe("applicant routes", ()=>{
             expect(response.status).toBe(500);
         });
     });
-    describe("PUT /api/applicant/:id/resume", ()=>{
-        it("should upload a resume", async ()=>{
-            const resume = "resume";
+    
+    describe('uploadResume', () => {
+        it("should upload a resume", async () => {
             const applicant = {
-                _id: "1",
+                _id: "66ec7fe7040a274645fcc7bb", 
                 userId: "1",
                 resume: "resume",
                 location: "location",
                 summary: "description",
                 jobName: "jobName",
             };
+        
+            (applicantServices.getApplicantByUserId as jest.Mock).mockResolvedValue(applicant);
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
-                req.body.userId = "1";
+                req.body.userId = "1"; 
                 next();
             });
             (applicantServices.uploadResume as jest.Mock).mockResolvedValue(applicant);
-            const response = await request(app).put("/api/applicant/1/resume").send({ resume });
+        
+            const response = await request(app)
+                .put(`/api/applicant/${applicant._id}/resume`)
+                .attach('resume', Buffer.from('fake file content'), 'resume.pdf');
+        
             expect(response.status).toBe(200);
             expect(response.body).toEqual(applicant);
         });
-        it("should return 500 if uploadResume throws an error", async ()=>{
+    });
+
+    describe('uploadProfilePic', () => {
+        it("should upload a profile picture", async () => {
+            const applicant = {
+                _id: "66ec7fe7040a274645fcc7bb", 
+                userId: "1",
+                resume: "resume",
+                location: "location",
+                summary: "description",
+                jobName: "jobName",
+            };
+        
+            (applicantServices.getApplicantByUserId as jest.Mock).mockResolvedValue(applicant);
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
-                req.body.userId = "1";
+                req.body.userId = "1"; 
                 next();
             });
-            (applicantServices.uploadResume as jest.Mock).mockRejectedValue(new Error());
-            const response = await request(app).put("/api/applicant/1/resume");
-            expect(response.status).toBe(500);
+            (applicantServices.uploadProfilePic as jest.Mock).mockResolvedValue(applicant);
+        
+            const response = await request(app)
+                .put(`/api/applicant/${applicant._id}/profile-pic`)
+                .attach('profilePic', Buffer.from('fake file content'), 'profilePic.jpg');
+        
+            expect(response.status).toBe(200);
+            expect(response.body).toEqual(applicant);
         });
     });
 });
