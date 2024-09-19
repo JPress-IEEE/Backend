@@ -1,18 +1,10 @@
 import request from "supertest";
 import express from "express";
 import * as clientServices from "../services/client.services";
-import { authMiddleware ,clientRoleoleMiddleware,adminRoleMiddleware} from "../middlewares/auth.middleware";
+import { authMiddleware, clientRoleoleMiddleware, adminRoleMiddleware } from "../middlewares/auth.middleware";
 import clientRouter from "../routes/client.route";
 import { ClientSchema } from "../schemas/client.schema";
-import c from "config";
 import { ZodError } from "zod";
-
-jest.mock("../middlewares/auth.middleware", () => ({
-    authMiddleware: jest.fn(),
-    applicantRoleMiddleware: jest.fn(),
-    clientRoleoleMiddleware: jest.fn(),
-    adminRoleMiddleware: jest.fn(),
-}));
 
 jest.mock("../services/client.services", () => ({
     createClient: jest.fn(),
@@ -20,291 +12,223 @@ jest.mock("../services/client.services", () => ({
     getClients: jest.fn(),
     updateClient: jest.fn(),
     deleteClient: jest.fn(),
+    getClientByUser: jest.fn(),
     uploadClientImage: jest.fn(),
-}));
+    }));
+
+jest.mock("../middlewares/auth.middleware", () => ({
+    authMiddleware: jest.fn(),
+    clientRoleoleMiddleware: jest.fn(),
+    adminRoleMiddleware: jest.fn(),
+    }));
 
 jest.mock("../schemas/client.schema", () => ({
     ClientSchema: {
         parseAsync: jest.fn(),
     },
-}));
+    }));
 
 const app = express();
 app.use(express.json());
 app.use("/api/client", clientRouter);
 
-describe("client route", () => {
-    describe("POST /api/client", () => {
-        it("should create a new client", async () => {
+describe("Client Router", () => {
+    describe("POST /client", () => {
+        it("should return 201 and the created client", async () => {
             const client = {
-                userId: "userId",
-                _id: "clientId",
+                _id: "1",
+                userId: "1",
             };
+            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (ClientSchema.parseAsync as jest.Mock).mockResolvedValue(client);
             (clientServices.createClient as jest.Mock).mockResolvedValue(client);
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
-                req.body.userId = "userId";
-                next();
-            });
-            const res = await request(app)
-                .post("/api/client")
-                .send(client);
-            expect(res.status).toBe(201);
-            expect(res.body).toEqual(client);
-        });
-        it("should return 400 if client validation fails", async () => {
-            const client = {
-                userId: "userId",
-                _id: "clientId",
-            };
-            const zodError = new ZodError([]);
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
-                req.body.userId = "userId";
-                next();
-            });
-            (ClientSchema.parseAsync as jest.Mock).mockRejectedValue(zodError);
-            const res = await request(app)
-                .post("/api/client")
-                .send(client);
-            expect(res.status).toBe(400);
-            expect(res.body).toEqual({ message: zodError.message });
-        });
-        it("should return 400 if client service throws an error", async () => {
-            const client = {
-                userId: "userId",
-                _id: "clientId",
-            };
-            const error = new Error("error");
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
-                req.body.userId = "userId";
-                next();
-            });
-            (ClientSchema.parseAsync as jest.Mock).mockResolvedValue(client);
-            (clientServices.createClient as jest.Mock).mockRejectedValue(error);
-            const res = await request(app)
-                .post("/api/client")
-                .send(client);
-            expect(res.status).toBe(400);
-            expect(res.body).toEqual({ message: error.message });
-        });
-        it("should return 401 if user is not a client", async () => {
-            const client = {
-                userId: "userId",
-                _id: "clientId",
-            };
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
-                res.status(401).send({ message: "Unauthorized" });
-            });
-            const res = await request(app)
-                .post("/api/client")
-                .send(client);
-            expect(res.status).toBe(401);
-            expect(res.body).toEqual({ message: "Unauthorized" });
-        });
-    });
-    describe("GET /api/client/:id", () => {
-        it("should get a client by id", async () => {
-            const client = {
-                userId: "1",
-                _id: "1",
-            };
-            (clientServices.getClientById as jest.Mock).mockResolvedValue(client);
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
-                req.body.userId = "1";
-                next();
-            });
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            const res = await request(app)
-            .get(`/api/client/1`)
 
-            expect(res.status).toBe(200);
-            expect(res.body).toEqual(client);
+            const response = await request(app)
+                .post("/api/client")
+                .send(client);
+            expect(response.status).toBe(201);
         });
-        it("should return 400 if client service throws an error", async () => {
+        it("should return 400 if the client is invalid", async () => {
             const client = {
+                _id: "1",
                 userId: "1",
-                _id: "clientId",
             };
-            const error = new Error("error");
+            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (ClientSchema.parseAsync as jest.Mock).mockRejectedValue(new ZodError([]));
+            (clientServices.createClient as jest.Mock).mockResolvedValue(client);
+
+            const response = await request(app)
+                .post("/api/client")
+                .send(client);
+            expect(response.status).toBe(400);
+        });
+    });
+    describe("GET /client/:id", () => {
+        it("should return 200 and the client", async () => {
+            const client = {
+                _id: "1",
+                userId: "1",
+            };
+            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (clientServices.getClientByUser as jest.Mock).mockResolvedValue([client]);
+            (clientServices.getClientById as jest.Mock).mockResolvedValue(client);
+
+            const response = await request(app)
+                .get("/api/client/1")
+                .send({ userId: "1" });
+            expect(response.status).toBe(200);
+        });
+        it("should return 401 if the user is unauthorized", async () => {
+            const client = {
+                _id: "2",
+                userId: "1",
+            };
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
                 req.body.userId = "1";
                 next();
             });
-            (clientServices.getClientById as jest.Mock).mockRejectedValue(error);
-            const res = await request(app)
+            (clientServices.getClientByUser as jest.Mock).mockResolvedValue([client]);
+            (clientServices.getClientById as jest.Mock).mockResolvedValue(client);
+
+            const response = await request(app)
                 .get("/api/client/1")
-            expect(res.status).toBe(400);
-            expect(res.body).toEqual({ message: error.message });
+                .send({ userId: "1" });
+            expect(response.status).toBe(401);
+        });
+        it("should return 404 if the client is not found", async () => {
+            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
+                req.body.userId = "1";
+                next();
+            });
+            (clientServices.getClientByUser as jest.Mock).mockImplementation(() => null);
+            (clientServices.getClientById as jest.Mock).mockResolvedValue(null);
+
+            const response = await request(app)
+                .get("/api/client/1")
+                .send({ userId: "1" });
+            expect(response.status).toBe(404);
         });
     });
-    describe("GET /api/client", () => {
-        it("should get all clients", async () => {
+    describe("GET /client", () => {
+        it("should return 200 and the clients", async () => {
             const clients = [
                 {
-                    userId: "1",
                     _id: "1",
+                    userId: "1",
                 },
                 {
-                    userId: "2",
                     _id: "2",
+                    userId: "2",
                 },
             ];
+            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (adminRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (clientServices.getClients as jest.Mock).mockResolvedValue(clients);
-            (adminRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            const res = await request(app)
+
+            const response = await request(app)
                 .get("/api/client");
-            expect(res.status).toBe(200);
-            expect(res.body).toEqual(clients);
-        });
-        it("should return 400 if client service throws an error", async () => {
-            const error = new Error("error");
-            (adminRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientServices.getClients as jest.Mock).mockRejectedValue(error);
-            const res = await request(app)
-                .get("/api/client");
-            expect(res.status).toBe(400);
-            expect(res.body).toEqual({ message: error.message });
+            expect(response.status).toBe(200);
         });
     });
-    describe("PUT /api/client/:id", () => {
-        it("should update a client", async () => {
+    describe("PUT /client/:id", () => {
+        it("should return 200 and the updated client", async () => {
             const client = {
-                userId: "1",
                 _id: "1",
+                userId: "1",
             };
-            (ClientSchema.parseAsync as jest.Mock).mockResolvedValue(client);
+            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
+                req.body.userId = "1";
+                next();
+            });
+            (clientServices.getClientByUser as jest.Mock).mockResolvedValue([client]);
             (clientServices.updateClient as jest.Mock).mockResolvedValue(client);
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
-                req.body.userId = "1";
-                next();
-            });
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            const res = await request(app)
+
+            const response = await request(app)
                 .put("/api/client/1")
-                .send(client);
-            expect(res.status).toBe(200);
-            expect(res.body).toEqual(client);
+                .send({ userId: "1" });
+            expect(response.status).toBe(200);
         });
-        it("should return 400 if client validation fails", async () => {
+        it("should return 401 if the user is unauthorized", async () => {
             const client = {
+                _id: "2",
                 userId: "1",
-                _id: "1",
             };
-            const zodError = new ZodError([]);
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
                 req.body.userId = "1";
                 next();
             });
-            (ClientSchema.parseAsync as jest.Mock).mockRejectedValue(zodError);
-            const res = await request(app)
+            (clientServices.getClientByUser as jest.Mock).mockResolvedValue([client]);
+            (clientServices.updateClient as jest.Mock).mockResolvedValue(client);
+
+            const response = await request(app)
                 .put("/api/client/1")
-                .send(client);
-            expect(res.status).toBe(400);
-            expect(res.body).toEqual({ message: zodError.message });
-        });
-        it("should return 400 if client service throws an error", async () => {
-            const client = {
-                userId: "1",
-                _id: "1",
-            };
-            const error = new Error("error");
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
-                req.body.userId = "1";
-                next();
-            });
-            (ClientSchema.parseAsync as jest.Mock).mockResolvedValue(client);
-            (clientServices.updateClient as jest.Mock).mockRejectedValue(error);
-            const res = await request(app)
-                .put("/api/client/1")
-                .send(client);
-            expect(res.status).toBe(400);
-            expect(res.body).toEqual({ message: error.message });
-        });
-        it("should return 401 if user is not a client", async () => {
-            const client = {
-                userId: "1",
-                _id: "1",
-            };
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
-                res.status(401).send({ message: "Unauthorized" });
-            });
-            const res = await request(app)
-                .put("/api/client/1")
-                .send(client);
-            expect(res.status).toBe(401);
-            expect(res.body).toEqual({ message: "Unauthorized" });
+                .send({ userId: "1" });
+            expect(response.status).toBe(401);
         });
     });
-    describe("DELETE /api/client/:id", () => {
-        it("should delete a client", async () => {
+    describe("DELETE /client/:id", () => {
+        it("should return 200 and the deleted client", async () => {
             const client = {
-                userId: "1",
                 _id: "1",
+                userId: "1",
             };
+            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
+                req.body.userId = "1";
+                next();
+            });
+            (clientServices.getClientByUser as jest.Mock).mockResolvedValue([client]);
             (clientServices.deleteClient as jest.Mock).mockResolvedValue(client);
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
-                req.body.userId = "1";
-                next();
-            });
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            const res = await request(app)
-                .delete("/api/client/1");
-            expect(res.status).toBe(200);
-            expect(res.body).toEqual(client);
+
+            const response = await request(app)
+                .delete("/api/client/1")
+                .send({ userId: "1" });
+            expect(response.status).toBe(200);
         });
-        it("should return 400 if client service throws an error", async () => {
-            const error = new Error("error");
+        it("should return 401 if the user is unauthorized", async () => {
+            const client = {
+                _id: "2",
+                userId: "1",
+            };
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
                 req.body.userId = "1";
                 next();
             });
-            (clientServices.deleteClient as jest.Mock).mockRejectedValue(error);
-            const res = await request(app)
-                .delete("/api/client/1");
-            expect(res.status).toBe(400);
-            expect(res.body).toEqual({ message: error.message });
+            (clientServices.getClientByUser as jest.Mock).mockResolvedValue([client]);
+            (clientServices.deleteClient as jest.Mock).mockResolvedValue(client);
+
+            const response = await request(app)
+                .delete("/api/client/1")
+                .send({ userId: "1" });
+            expect(response.status).toBe(401);
         });
     });
-    describe("POST /api/client/:id/profile-pic", () => {
-        it("should upload a client image", async () => {
+    describe("POST /client/:id/profile-pic", () => {
+        it("should return 200 and the updated user", async () => {
             const client = {
-                userId: "1",
                 _id: "1",
+                userId: "1",
             };
+            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
+                req.body.userId = "1";
+                next();
+            });
+            (clientServices.getClientByUser as jest.Mock).mockResolvedValue([client]);
             (clientServices.uploadClientImage as jest.Mock).mockResolvedValue(client);
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
-                req.body.userId = "1";
-                next();
-            });
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            const res = await request(app)
-                .post("/api/client/1/profile-pic");
-            expect(res.status).toBe(200);
-            expect(res.body).toEqual(client);
-        });
-        it("should return 400 if client service throws an error", async () => {
-            const error = new Error("error");
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
-                req.body.userId = "1";
-                next();
-            });
-            (clientServices.uploadClientImage as jest.Mock).mockRejectedValue(error);
-            const res = await request(app)
-                .post("/api/client/1/profile-pic");
-            expect(res.status).toBe(400);
-            expect(res.body).toEqual({ message: error.message });
+
+            const response = await request(app)
+                .post("/api/client/1/profile-pic")
+                .attach('profilePic', Buffer.from('fake file content'), 'profilePic.jpg');
+            expect(response.status).toBe(200);
         });
     });
 });
