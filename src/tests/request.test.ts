@@ -7,6 +7,7 @@ import { RequestSchema } from "../schemas/request.schema";
 import c from "config";
 import { getClientIdFromRequestId } from "../services/request.services";
 import { ZodError } from "zod";
+import {getUserByClient} from '../services/client.services';
 
 jest.mock("../services/request.services", () => ({
     createRequest: jest.fn(),
@@ -29,6 +30,10 @@ jest.mock("../schemas/request.schema", () => ({
     RequestSchema: {
         parseAsync: jest.fn(),
     },
+}));
+
+jest.mock("../services/client.services", () => ({
+    getUserByClient: jest.fn(),
 }));
 
 const app = express();
@@ -67,6 +72,7 @@ describe("Request Router", () => {
                 description: "Full stack developer",
                 location: "Lagos",
             };
+            (getUserByClient as jest.Mock).mockResolvedValue("123");    
             (requestService.getRequestById as jest.Mock).mockResolvedValue(mockRequest);
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
@@ -90,6 +96,7 @@ describe("Request Router", () => {
                 description: "Full stack developer",
                 location: "Lagos",
             };
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             (RequestSchema.parseAsync as jest.Mock).mockResolvedValue(mockRequest);
             (requestService.updateRequest as jest.Mock).mockResolvedValue(mockRequest);
             (getClientIdFromRequestId as jest.Mock).mockResolvedValue("123");
@@ -107,6 +114,7 @@ describe("Request Router", () => {
     });
     describe("DELETE /api/request/:id", () => {
         it.concurrent("should call deleteRequest controller", async () => {
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             (requestService.deleteRequest as jest.Mock).mockResolvedValue(null);
             (getClientIdFromRequestId as jest.Mock).mockResolvedValue("123");
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
@@ -128,6 +136,7 @@ describe("Request Router", () => {
                 description: "Full stack developer",
                 location: "Lagos",
             };
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             (requestService.getRequestsByClientId as jest.Mock).mockResolvedValue([mockRequest]);
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) =>{
@@ -149,6 +158,7 @@ describe("Request Router", () => {
                 description: "Full stack developer",
                 location: "Lagos",
             };
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             (requestService.getRequests as jest.Mock).mockResolvedValue([mockRequest]);
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             const res = await request(app)
@@ -159,6 +169,7 @@ describe("Request Router", () => {
     });
     describe("DELETE /api/request/client/:clientId", () => {
         it.concurrent("should call deleteRequestByClientId controller", async () => {
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             (requestService.deleteRequestByClientId as jest.Mock).mockResolvedValue(null);
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) =>{
@@ -179,6 +190,7 @@ describe("Request Router", () => {
                 description: "Full stack developer",
                 location: "Lagos",
             };
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             const zodError = new ZodError([]);
             (RequestSchema.parseAsync as jest.Mock).mockRejectedValue(zodError);
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
@@ -199,6 +211,7 @@ describe("Request Router", () => {
                 description: "Full stack developer",
                 location: "Lagos",
             };
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             (RequestSchema.parseAsync as jest.Mock).mockResolvedValue(mockRequest);
             (requestService.createRequest as jest.Mock).mockRejectedValue(new Error("Internal Server Error"));
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
@@ -216,6 +229,7 @@ describe("Request Router", () => {
                 description: "Full stack developer",
                 location: "Lagos",
             };
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             const zodError = new ZodError([]);
             (RequestSchema.parseAsync as jest.Mock).mockRejectedValue(zodError);
             (getClientIdFromRequestId as jest.Mock).mockResolvedValue("123");   
@@ -237,6 +251,7 @@ describe("Request Router", () => {
                 description: "Full stack developer",
                 location: "Lagos",
             };
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             (RequestSchema.parseAsync as jest.Mock).mockResolvedValue(mockRequest);
             (getClientIdFromRequestId as jest.Mock).mockResolvedValue("123");
             (requestService.updateRequest as jest.Mock).mockRejectedValue(new Error("Internal Server Error"));
@@ -251,6 +266,7 @@ describe("Request Router", () => {
             expect(res.status).toBe(500);
         });
         it.concurrent("should return 500 if an error occurs", async () => {
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             (requestService.deleteRequest as jest.Mock).mockRejectedValue(new Error("Internal Server Error"));
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (getClientIdFromRequestId as jest.Mock).mockResolvedValue("123");
@@ -263,6 +279,7 @@ describe("Request Router", () => {
             expect(res.status).toBe(500);
         });
         it.concurrent("should return 500 if an error occurs", async () => {
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             (requestService.deleteRequestByClientId as jest.Mock).mockRejectedValue(new Error("Internal Server Error"));
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
@@ -274,6 +291,7 @@ describe("Request Router", () => {
             expect(res.status).toBe(500);
         });
         it.concurrent("should return 500 if an error occurs", async () => {
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             (requestService.getRequests as jest.Mock).mockRejectedValue(new Error("Internal Server Error"));
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             const res = await request(app)
@@ -281,6 +299,7 @@ describe("Request Router", () => {
             expect(res.status).toBe(500);
         });
         it.concurrent("should return 500 if an error occurs", async () => {
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             (requestService.getRequestsByClientId as jest.Mock).mockRejectedValue(new Error("Internal Server Error"));
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) =>{
@@ -292,6 +311,7 @@ describe("Request Router", () => {
             expect(res.status).toBe(500);
         });
         it.concurrent("should return 500 if an error occurs", async () => {
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             (requestService.getRequestById as jest.Mock).mockRejectedValue(new Error("Internal Server Error"));
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (getClientIdFromRequestId as jest.Mock).mockResolvedValue("123");
@@ -313,6 +333,7 @@ describe("Request Router", () => {
                 description: "Full stack developer",
                 location: "Lagos",
             };
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             (RequestSchema.parseAsync as jest.Mock).mockResolvedValue(mockRequest);
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).end());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
@@ -328,6 +349,7 @@ describe("Request Router", () => {
                 description: "Full stack developer",
                 location: "Lagos",
             };
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             (RequestSchema.parseAsync as jest.Mock).mockResolvedValue(mockRequest);
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(403).end());
@@ -346,6 +368,7 @@ describe("Request Router", () => {
                 description: "Full stack developer",
                 location: "Lagos",
             };
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             (RequestSchema.parseAsync as jest.Mock).mockResolvedValue(mockRequest);
             (getClientIdFromRequestId as jest.Mock).mockResolvedValue("123");
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).end());
@@ -365,6 +388,7 @@ describe("Request Router", () => {
                 description: "Full stack developer",
                 location: "Lagos",
             };
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             (RequestSchema.parseAsync as jest.Mock).mockResolvedValue(mockRequest);
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(403).end());
@@ -381,6 +405,7 @@ describe("Request Router", () => {
                 description: "Full stack developer",
                 location: "Lagos",
             };
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             (RequestSchema.parseAsync as jest.Mock).mockResolvedValue(mockRequest);
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).end());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
@@ -397,6 +422,7 @@ describe("Request Router", () => {
                 description: "Full stack developer",
                 location: "Lagos",
             };
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             (RequestSchema.parseAsync as jest.Mock).mockResolvedValue(mockRequest);
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(403).end());
@@ -414,6 +440,7 @@ describe("Request Router", () => {
                 description: "Full stack developer",
                 location: "Lagos",
             };
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             (RequestSchema.parseAsync as jest.Mock).mockResolvedValue(mockRequest);
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).end());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
@@ -429,6 +456,7 @@ describe("Request Router", () => {
                 description: "Full stack developer",
                 location: "Lagos",
             };
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             (RequestSchema.parseAsync as jest.Mock).mockResolvedValue(mockRequest);
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(403).end());
@@ -438,6 +466,7 @@ describe("Request Router", () => {
             expect(res.status).toBe(403);
         });
         it("should return 401 if user is not authenticated", async () => {
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).end());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             const res = await request(app)
@@ -445,6 +474,7 @@ describe("Request Router", () => {
             expect(res.status).toBe(401);
         });
         it("should return 403 if user is not a client", async () => {
+            (getUserByClient as jest.Mock).mockResolvedValue("123");
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(403).end());
             (requestService.getRequestsByClientId as jest.Mock).mockResolvedValue([]);
