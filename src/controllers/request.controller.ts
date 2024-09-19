@@ -4,6 +4,8 @@ import * as requestService from '../services/request.services';
 import { RequestSchema } from '../schemas/request.schema';
 import { ZodError } from 'zod';
 import { getClientIdFromRequestId } from '../services/request.services';
+import {getClientByUser} from '../services/client.services';
+import {getUserByClient} from '../services/client.services';  
 
 export const createRequest = async (req: Request, res: Response, next:NextFunction) => {
     try {
@@ -25,7 +27,10 @@ export const getRequest = async (req: Request, res: Response, next:NextFunction)
     try {
         const id = req.body.userId;
         const clientId = await getClientIdFromRequestId(req.params.id);
-        if (id !== clientId) {
+        const userId = await getUserByClient(clientId);
+        console.log(userId);
+        console.log(id);
+        if (id !== (userId?.toString())) {
             res.status(403).send({ message: 'Unauthorized' });
             return;
         }
@@ -40,7 +45,8 @@ export const updateRequest = async (req: Request, res: Response, next:NextFuncti
     try {
         const id = req.body.userId;
         const clientId = await getClientIdFromRequestId(req.params.id);
-        if (id !== clientId) {
+        const userId = await getUserByClient(clientId);
+        if (id !== (userId?.toString())) {
             res.status(403).send({ message: 'Unauthorized' });
             return;
         }
@@ -62,7 +68,8 @@ export const deleteRequest = async (req: Request, res: Response, next:NextFuncti
     try {
         const id = req.body.userId;
         const clientId = await getClientIdFromRequestId(req.params.id);
-        if (id !== clientId) {
+        const userId = await getUserByClient(clientId);
+        if (id !== (userId?.toString())) {
             res.status(403).send({ message: 'Unauthorized' });
             return;
         }
@@ -76,7 +83,8 @@ export const deleteRequest = async (req: Request, res: Response, next:NextFuncti
 export const getRequestByClientId = async (req: Request, res: Response, next:NextFunction) => {
     try {
         const id = req.body.userId;
-        if (id !== req.params.clientId) {
+        const userId = await getUserByClient(req.params.clientId);
+        if (id !== (userId?.toString())) {
             res.status(403).send({ message: 'Unauthorized' });
             return;
         }
@@ -87,11 +95,11 @@ export const getRequestByClientId = async (req: Request, res: Response, next:Nex
     }
 };
 
-export const getRequests = async (req: Request, res: Response, next:NextFunction) => {
+export const getRequests = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const requests = await requestService.getRequests(JSON.stringify(req.query));
+        const requests = await requestService.getRequests(req.query);  
         res.status(200).json(requests);
-    } catch (err:any) {
+    } catch (err: any) {
         next(err);
     }
 };
@@ -99,7 +107,8 @@ export const getRequests = async (req: Request, res: Response, next:NextFunction
 export const deleteRequestByClientId = async (req: Request, res: Response, next:NextFunction) => {
     try {
         const id = req.body.userId;
-        if (id !== req.params.clientId) {
+        const userId = await getUserByClient(req.params.clientId);
+        if (id !== (userId?.toString())) {
             res.status(403).send({ message: 'Unauthorized' });
             return;
         }
