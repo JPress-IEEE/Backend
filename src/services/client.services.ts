@@ -71,3 +71,12 @@ export const uploadClientImage = async (clientId: string, profilePic: string)=> 
         throw err.message;
     }
 };
+
+export const getClientByUser = async(userId :string)=>{
+    try{
+        const result = await Client.find({userId});
+        return result;
+    }catch(err:any){
+        throw err.message;
+    }
+}
