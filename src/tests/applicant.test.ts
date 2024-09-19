@@ -8,6 +8,8 @@ import { userSchema } from "../schemas/user.schema";
 import * as userServices from "../services/user.services";
 import * as APIFeatures from "../utils/APIFeatures.utils";
 import { authMiddleware,applicantRoleMiddleware,adminRoleMiddleware} from "../middlewares/auth.middleware";
+import { updateData ,deleteData} from "../services/recommendation.services";
+import { getEmailByApplicantId } from "../services/applicant.services";
 
 jest.mock("../services/applicant.services", () => ({
     getApplicants: jest.fn(),
@@ -19,6 +21,7 @@ jest.mock("../services/applicant.services", () => ({
     uploadProfilePic: jest.fn(),
     searchApplicants: jest.fn(),
     filterApplicants: jest.fn(),
+    getEmailByApplicantId: jest.fn(),
 }));
 
 jest.mock("../middlewares/auth.middleware", () => ({
@@ -39,6 +42,11 @@ jest.mock("../schemas/user.schema", () => ({
         parse: jest.fn(),
         parseAsync: jest.fn(),
     },
+}));
+
+jest.mock("../services/recommendation.services", () => ({   
+    updateData: jest.fn(),
+    deleteData: jest.fn(),
 }));
 
 jest.mock('../schemas/applicant.schema', () => ({
@@ -160,6 +168,8 @@ describe("applicant routes", ()=>{
                 req.body.userId = "1";
                 next();
             });
+            (getEmailByApplicantId as jest.Mock).mockResolvedValue("email");
+            (updateData as jest.Mock).mockResolvedValue(undefined);
             (applicantServices.updateApplicant as jest.Mock).mockResolvedValue(applicant);
             (ApplicantSchema.parse as jest.Mock).mockResolvedValue(applicant);
             const response = await request(app).put("/api/applicant/1").send(applicant);
@@ -172,6 +182,8 @@ describe("applicant routes", ()=>{
                 req.body.userId = "1";
                 next();
             });
+            (getEmailByApplicantId as jest.Mock).mockResolvedValue("email");
+            (updateData as jest.Mock).mockResolvedValue(undefined);
             (applicantServices.updateApplicant as jest.Mock).mockRejectedValue(new Error());
             const response = await request(app).put("/api/applicant/1");
             expect(response.status).toBe(500);
@@ -192,7 +204,10 @@ describe("applicant routes", ()=>{
                 req.body.userId = "1";
                 next();
             });
+
             (applicantServices.deleteApplicant as jest.Mock).mockResolvedValue(applicant);
+            (getEmailByApplicantId as jest.Mock).mockResolvedValue("email");
+            (updateData as jest.Mock).mockResolvedValue(undefined);
             const response = await request(app).delete("/api/applicant/1");
             expect(response.status).toBe(200);
             expect(response.body).toEqual(applicant);
@@ -203,6 +218,8 @@ describe("applicant routes", ()=>{
                 req.body.userId = "1";
                 next();
             });
+            (getEmailByApplicantId as jest.Mock).mockResolvedValue("email");
+            (updateData as jest.Mock).mockResolvedValue(undefined);
             (applicantServices.deleteApplicant as jest.Mock).mockRejectedValue(new Error());
             const response = await request(app).delete("/api/applicant/1");
             expect(response.status).toBe(500);
