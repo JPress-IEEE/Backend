@@ -12,7 +12,7 @@ dotenv.config();
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID!,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    callbackURL: 'http://localhost:3000/auth/google/callback'
+    callbackURL: 'http://localhost:3002/api/auth/google/callback'
 },
     async (accessToken, refreshToken, profile, done) => {
         try {
@@ -57,7 +57,7 @@ passport.use(new GoogleStrategy({
 passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID!,
     clientSecret: process.env.FACEBOOK_APP_SECRET!,
-    callbackURL: 'http://localhost:3000/auth/facebook/callback',
+    callbackURL: 'http://localhost:3002/api/auth/facebook/callback',
     profileFields: ['id', 'emails', 'name', 'photos']
 },
     async (accessToken, refreshToken, profile, done) => {
@@ -103,7 +103,7 @@ passport.use(new FacebookStrategy({
 passport.use(new LinkedinStrategy({
     clientID: process.env.LINKEDIN_CLIENT_ID!,
     clientSecret: process.env.LINKEDIN_CLIENT_SECRET!,
-    callbackURL: 'http://localhost:3000/auth/linkedin/callback',
+    callbackURL: 'http://localhost:3002/api/auth/linkedin/callback',
     scope: ['r_emailaddress', 'r_liteprofile']
 },
     async (accessToken, refreshToken, profile, done) => {
