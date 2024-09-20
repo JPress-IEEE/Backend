@@ -70,6 +70,7 @@ export const applicantRoleMiddleware = async (req: Request, res: Response, next:
         if (user.role !== 'applicant') {
             return res.status(403).send({ message: 'Unauthorized' });
         }
+        
         req.body.userId = userId;
         req.body.role = user.role;
         next();
