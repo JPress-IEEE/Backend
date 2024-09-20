@@ -160,3 +160,16 @@ export const getEmailByApplicantId = async (applicantId: string): Promise<string
         throw err.message;
     }
 };
+
+export const getUserIdByApplicantId = async (applicantId: string) => {
+    try {
+        const applicant = await Applicant.findById(applicantId);
+        if (!applicant) {
+            throw new Error('Applicant not found');
+        }
+        return applicant.userId;
+    }
+    catch (err: any) {
+        throw err.message;
+    }
+};
