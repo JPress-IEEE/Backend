@@ -64,8 +64,11 @@ export const deleteClient = async (clientId: string): Promise<IClient | null> =>
 export const uploadClientImage = async (clientId: string, profilePic: string)=> {
     try {
         const userId = await Client.findById(clientId);
-        const result = await User.findByIdAndUpdate(userId?.userId as IUser["_id"], { profilePic }, { new: true });
-        return result;
+        let result = await User.findByIdAndUpdate(userId?.userId as IUser["_id"], { profilePic }, { new: true });
+        return {
+            _id: result?._id,
+            profilePic: result?.profilePic!
+        };
     }
     catch (err: any) {
         throw err.message;
