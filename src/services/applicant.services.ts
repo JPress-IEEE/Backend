@@ -4,12 +4,17 @@ import { APIFeatures } from "../utils/APIFeatures.utils";
 import { User, IUser } from "../models/user.model";
 import { deleteUser } from "./user.services";
 import { FilterQuery } from "mongoose";
+import { storeData } from "./recommendation.services";
 
 
 export const createApplicant = async (applicant: IApplicant): Promise<IApplicant> => {
     try {
         const newApplicant = new Applicant(applicant);
         const result = await newApplicant.save();
+        const id = result._id as string;
+        const email = await getEmailByApplicantId(id) as string;
+        const description = result.summary; 
+        await storeData(email, description);
         return result;
     }
     catch (err: any) {

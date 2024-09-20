@@ -1,14 +1,14 @@
-import { Request, Response ,NextFunction} from 'express';
+import { Request, Response, NextFunction } from 'express';
 import * as applicantServices from '../services/applicant.services';
 import { IApplicant } from '../models/applicant.model';
-import {ApplicantSchema} from '../schemas/applicant.schema';
+import { ApplicantSchema } from '../schemas/applicant.schema';
 import { userSchema } from '../schemas/user.schema';
-import {storeData,updateData,deleteData} from '../services/recommendation.services';
-import {getApplicantById, getEmailByApplicantId} from '../services/applicant.services';
+import { storeData, updateData, deleteData } from '../services/recommendation.services';
+import { getApplicantById, getEmailByApplicantId } from '../services/applicant.services';
 import mongoose, { mongo } from 'mongoose';
 
 
-export const getApplicants = async (req: Request, res: Response,next:NextFunction) => {
+export const getApplicants = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const queryStr = req.query as unknown as string;
         const applicants = await applicantServices.getApplicants(queryStr);
@@ -18,24 +18,23 @@ export const getApplicants = async (req: Request, res: Response,next:NextFunctio
     }
 };
 
-export const getApplicant = async (req: Request, res: Response , next:NextFunction) => {
+export const getApplicant = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const id = req.params.id as unknown as mongoose.Types.ObjectId;
-        
-        if(!id){
-            return res.status(400).send({error: 'Applicant id is required.'});
+        const id = req.params.id;
+        if (!id) {
+            return res.status(400).send({ error: 'Applicant id is required.' });
         }
-        const applicantId = await applicantServices.getApplicantByUserId(req.body.userId);
-        if((applicantId as { _id: mongoose.Types.ObjectId })._id.toString() !== id.toString()){
-            res.status(401).json({ message: 'Unauthorized' });
-            return;
+        const applicant = await getApplicantById(id) as any;
+        if (applicant?.userId.toString() !== req.body.userId) {
+            res.status(401).send({ error: 'Unauthorized' });
         }
-        const applicant = await applicantServices.getApplicantById(id.toString());
         res.status(200).send(applicant);
-    } catch (error) {
+
+    } catch (error: any) {
+        console.log("Error in controller:", error.message);
         next(error);
     }
-};
+}
 
 export const createApplicant = async (req: Request, res: Response , next:NextFunction) => {
     try {
@@ -61,18 +60,19 @@ export const createApplicant = async (req: Request, res: Response , next:NextFun
     }
 };
 
-export const updateApplicant = async (req: Request, res: Response , next:NextFunction) => {
+
+export const updateApplicant = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const id = req.params.id as unknown as mongoose.Types.ObjectId;
-        
-        if(!id){
-            return res.status(400).send({error: 'Applicant id is required.'});
+        const id = req.params.id;
+
+        if (!id) {
+            return res.status(400).send({ error: 'Applicant id is required.' });
         }
-        const applicantId = await applicantServices.getApplicantByUserId(req.body.userId);
-        if((applicantId as { _id: mongoose.Types.ObjectId })._id.toString() !== id.toString()){
+        const applicantId = await applicantServices.getApplicantByUserId(req.body.userId) as any;
+        if (applicantId?.userId.toString() !== req.body.userId) {
             res.status(401).json({ message: 'Unauthorized' });
             return;
-        }
+        };
         const applicant = {
             userId: req.body.userId,
             location: req.body.location,
@@ -83,11 +83,11 @@ export const updateApplicant = async (req: Request, res: Response , next:NextFun
         const result = await ApplicantSchema.parseAsync(applicant) as IApplicant;
         const updatedApplicant = await applicantServices.updateApplicant(id.toString(), result);
         const email = await getEmailByApplicantId(id.toString());
-        if(updatedApplicant && email){
-            await updateData(email,updatedApplicant.summary);
+        if (updatedApplicant && email) {
+            await updateData(email, updatedApplicant.summary);
         }
         res.status(200).send(updatedApplicant);
-    } catch (error:any) {
+    } catch (error: any) {
         console.log("Error in controller:", error.message);
         next(error);
     }
@@ -95,13 +95,13 @@ export const updateApplicant = async (req: Request, res: Response , next:NextFun
 
 export const deleteApplicant = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const id = req.params.id as unknown as mongoose.Types.ObjectId;
-        
-        if(!id){
-            return res.status(400).send({error: 'Applicant id is required.'});
+        const id = req.params.id;
+
+        if (!id) {
+            return res.status(400).send({ error: 'Applicant id is required.' });
         }
-        const applicantId = await applicantServices.getApplicantByUserId(req.body.userId);
-        if((applicantId as { _id: mongoose.Types.ObjectId })._id.toString() !== id.toString()){
+        const applicantId = await applicantServices.getApplicantByUserId(req.body.userId) as any;
+        if(applicantId?.userId.toString() !== req.body.userId) {
             res.status(401).json({ message: 'Unauthorized' });
             return;
         }
@@ -124,16 +124,16 @@ export const deleteApplicant = async (req: Request, res: Response, next: NextFun
 };
 
 
-export const uploadResume = async (req: Request, res: Response , next:NextFunction) => {
+export const uploadResume = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const id = req.params.id as unknown as mongoose.Types.ObjectId;
-        
-        if(!id){
-            return res.status(400).send({error: 'Applicant id is required.'});
+
+        if (!id) {
+            return res.status(400).send({ error: 'Applicant id is required.' });
         }
         console.log("User id:", req.body.userId);
         const applicantId = await applicantServices.getApplicantByUserId(req.body.userId);
-        if((applicantId as { _id: mongoose.Types.ObjectId })._id.toString() !== id.toString()){
+        if ((applicantId as { _id: mongoose.Types.ObjectId })._id.toString() !== id.toString()) {
             res.status(401).json({ message: 'Unauthorized' });
             return;
         }
@@ -151,12 +151,12 @@ export const uploadResume = async (req: Request, res: Response , next:NextFuncti
 export const uploadProfilePic = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const id = req.params.id as unknown as mongoose.Types.ObjectId;
-        
-        if(!id){
-            return res.status(400).send({error: 'Applicant id is required.'});
+
+        if (!id) {
+            return res.status(400).send({ error: 'Applicant id is required.' });
         }
         const applicantId = await applicantServices.getApplicantByUserId(req.body.userId);
-        if((applicantId as { _id: mongoose.Types.ObjectId })._id.toString() !== id.toString()){
+        if ((applicantId as { _id: mongoose.Types.ObjectId })._id.toString() !== id.toString()) {
             res.status(401).json({ message: 'Unauthorized' });
             return;
         }
@@ -167,17 +167,17 @@ export const uploadProfilePic = async (req: Request, res: Response, next: NextFu
         const updatedApplicant = await applicantServices.uploadProfilePic(id.toString(), profilePic);
 
         res.status(200).send(updatedApplicant);
-    } catch (error:any) {
+    } catch (error: any) {
         console.log(error.message);
         next(error);
     }
 };
 
-export const getApplicantByUserId = async (req: Request, res: Response , next:NextFunction) => {
+export const getApplicantByUserId = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = req.params.userId;
-        if(!userId){
-            return res.status(400).send({error: 'User id is required.'});
+        if (!userId) {
+            return res.status(400).send({ error: 'User id is required.' });
         }
         const applicant = await applicantServices.getApplicantByUserId(userId);
         res.status(200).send(applicant);
@@ -186,11 +186,11 @@ export const getApplicantByUserId = async (req: Request, res: Response , next:Ne
     }
 };
 
-export const getApplicantByJobName = async (req: Request, res: Response , next:NextFunction) => {
+export const getApplicantByJobName = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const jobName = req.params.jobName;
-        if(!jobName){
-            return res.status(400).send({error: 'Job name is required.'});
+        if (!jobName) {
+            return res.status(400).send({ error: 'Job name is required.' });
         }
         const applicants = await applicantServices.getApplicantByJobName(jobName);
         res.status(200).send(applicants);
@@ -199,11 +199,11 @@ export const getApplicantByJobName = async (req: Request, res: Response , next:N
     }
 };
 
-export const getApplicantByLocation = async (req: Request, res: Response , next:NextFunction) => {
+export const getApplicantByLocation = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const location = req.params.location;
-        if(!location){
-            return res.status(400).send({error: 'Location is required.'});
+        if (!location) {
+            return res.status(400).send({ error: 'Location is required.' });
         }
         const applicants = await applicantServices.getApplicantByLocation(location);
         res.status(200).send(applicants);
@@ -212,11 +212,11 @@ export const getApplicantByLocation = async (req: Request, res: Response , next:
     }
 };
 
-export const getApplicantByPayoutAccountId = async (req: Request, res: Response , next:NextFunction) => {
+export const getApplicantByPayoutAccountId = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const payoutAccountId = req.params.payoutAccountId;
-        if(!payoutAccountId){
-            return res.status(400).send({error: 'Payout account id is required.'});
+        if (!payoutAccountId) {
+            return res.status(400).send({ error: 'Payout account id is required.' });
         }
         const applicants = await applicantServices.getApplicantByPayoutAccountId(payoutAccountId);
         res.status(200).send(applicants);
