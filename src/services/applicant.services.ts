@@ -10,12 +10,12 @@ import { storeData } from "./recommendation.services";
 export const createApplicant = async (applicant: IApplicant): Promise<IApplicant> => {
     try {
         const newApplicant = new Applicant(applicant);
-        const result = await newApplicant.save();
+        let result = await newApplicant.save();
         const id = result._id as string;
         const email = await getEmailByApplicantId(id) as string;
-        const description = result.summary; 
+        const description = result.summary;
         await storeData(email, description);
-        return result;
+        return result = await Applicant.populate(result, { path: 'userId', select: '-payoutAccountId -_id' });
     }
     catch (err: any) {
         throw err.message;
@@ -24,8 +24,8 @@ export const createApplicant = async (applicant: IApplicant): Promise<IApplicant
 
 export const getApplicantById = async (applicantId: string): Promise<IApplicant | null> => {
     try {
-        const result = await Applicant.findById(applicantId);
-        return result;
+        let result = await Applicant.findById(applicantId);
+        return result = await Applicant.populate(result, { path: 'userId', select: '-payoutAccountId -_id' });
     }
     catch (err: any) {
         throw err.message;
@@ -51,8 +51,8 @@ export const getApplicants = async (queryString: string): Promise<IApplicant[]> 
 
 export const updateApplicant = async (applicantId: string, applicant: IApplicant): Promise<IApplicant | null> => {
     try {
-        const result = await Applicant.findByIdAndUpdate(applicantId, applicant, { new: true });
-        return result;
+        let result = await Applicant.findByIdAndUpdate(applicantId, applicant, { new: true });
+        return result = await Applicant.populate(result, { path: 'userId', select: '-payoutAccountId -_id' });
     }
     catch (err: any) {
         throw err.message;
@@ -62,12 +62,12 @@ export const updateApplicant = async (applicantId: string, applicant: IApplicant
 
 export const deleteApplicant = async (applicantId: string): Promise<IApplicant | null> => {
     try {
-        const applicant = await Applicant.findByIdAndDelete(applicantId);
+        let applicant = await Applicant.findByIdAndDelete(applicantId);
         if (!applicant) {
             throw new Error('Applicant not found');
         }
         await deleteUser(applicant.userId as string);
-        return applicant;
+        return applicant = await Applicant.populate(applicant, { path: 'userId', select: '-payoutAccountId -_id' });
     }
     catch (err: any) {
         console.log("Error deleting applicant:", err.message);
@@ -75,10 +75,13 @@ export const deleteApplicant = async (applicantId: string): Promise<IApplicant |
     }
 };
 
-export const uploadResume = async (applicantId: string, resume: string): Promise<IApplicant | null> => {
+export const uploadResume = async (applicantId: string, resume: string) => {
     try {
-        const result = await Applicant.findByIdAndUpdate(applicantId, { resume }, { new: true });
-        return result;
+        let result = await Applicant.findByIdAndUpdate(applicantId, { resume }, { new: true });
+        return {
+            _id: result?._id,
+            resume: result?.resume!
+        }
     }
     catch (err: any) {
         throw err.message;
@@ -94,13 +97,16 @@ export const uploadProfilePic = async (applicantId: string, profilePic: string) 
         let updatedUser = await User.findByIdAndUpdate(
             applicant.userId as IUser["_id"],
             { profilePic },
-            { new: true } 
+            { new: true }
         );
         if (!updatedUser) {
             throw new Error('User not found or update failed.');
         }
-       return updatedUser;
-        
+        return {
+            _id: updatedUser?._id,
+            profilePic: updatedUser?.profilePic!
+        }
+
     } catch (err: any) {
         console.error(err);
         throw new Error(err.message || 'An error occurred while uploading the profile picture.');
@@ -110,8 +116,8 @@ export const uploadProfilePic = async (applicantId: string, profilePic: string) 
 
 export const getApplicantByUserId = async (userId: string): Promise<IApplicant | null> => {
     try {
-        const result = await Applicant.findOne({ userId});
-        return result;
+        let result = await Applicant.findOne({ userId });
+        return result = await Applicant.populate(result, { path: 'userId', select: '-payoutAccountId -_id' });
     }
     catch (err: any) {
         throw err.message;
@@ -120,8 +126,8 @@ export const getApplicantByUserId = async (userId: string): Promise<IApplicant |
 
 export const getApplicantByJobName = async (jobName: string): Promise<IApplicant[]> => {
     try {
-        const result = await Applicant.find({ jobName });
-        return result;
+        let result = await Applicant.find({ jobName });
+        return result = await Applicant.populate(result, { path: 'userId', select: '-payoutAccountId -_id' });
     }
     catch (err: any) {
         throw err.message;
@@ -130,8 +136,8 @@ export const getApplicantByJobName = async (jobName: string): Promise<IApplicant
 
 export const getApplicantByLocation = async (location: string): Promise<IApplicant[]> => {
     try {
-        const result = await Applicant.find({ location });
-        return result;
+        let result = await Applicant.find({ location });
+        return result = await Applicant.populate(result, { path: 'userId', select: '-payoutAccountId -_id' });
     }
     catch (err: any) {
         throw err.message;
