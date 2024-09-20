@@ -1,10 +1,11 @@
 import { Router } from "express";
-import { endVideoCall } from "../controllers/videocall.controller";
-import { startVideoCall } from "../controllers/videocall.controller";
+import { acceptCall, declineCall, endVideoCall, requestCall } from "../controllers/videocall.controller";
 
 const router = Router();
 
-router.post("/videocall/start", startVideoCall);
-router.put("/videocall/end/:callId", endVideoCall);
+router.post("/request", requestCall);
+router.post("/accept", acceptCall);
+router.post("/decline", declineCall);
+router.post("/end", endVideoCall);
 
 export default router;
