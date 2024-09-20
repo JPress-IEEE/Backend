@@ -26,7 +26,7 @@ export const getOfferById = async (offerId: string): Promise<IOffer | null> => {
 
 export const getOffersByApplicantId = async (applicantId: string): Promise<IOffer[]> => {
     try{
-        const result = await Offer.find({applicantId:applicantId});
+        const result = await Offer.find({applicantId});
         return result;
     }
     catch(err:any){

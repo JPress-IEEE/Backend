@@ -25,7 +25,7 @@ const OfferSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        required: true
+        default: 'pending',
     },
     price: {
         type: Number,
@@ -34,7 +34,6 @@ const OfferSchema = new mongoose.Schema({
     feedbackId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Feedback',
-        required: true
     },
     createdAt: {
         type: Date,

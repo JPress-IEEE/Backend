@@ -4,12 +4,15 @@ import { IOffer } from '../models/offer.model';
 import {OfferSchema} from '../schemas/offer.schema';
 import { ZodError } from 'zod';
 import * as requsetServices from '../services/request.services';
+import {getUserIdByApplicantId} from '../services/applicant.services';
+import { getUserByClient} from '../services/client.services';
+import c from 'config';
 
 
 export const createOffer = async (req: Request, res: Response,next:NextFunction) => {
     try{
         const offer = req.body as IOffer;
-        const validatedOffer = await OfferSchema.parseAsync(offer) as unknown as IOffer;
+        let validatedOffer = await OfferSchema.parseAsync(offer) as unknown as IOffer;
         const result = await offerServices.createOffer(validatedOffer);
         res.status(201).send(result);
     }
@@ -39,12 +42,16 @@ export const getOfferById = async (req: Request, res: Response,next:NextFunction
 
 export const getOffersByApplicantId = async (req: Request, res: Response,next:NextFunction) => {
     try{
-        const id = req.body.userId;
-        const applicantId = req.params.applicantId;
-        if(id !== applicantId){
+        const userId = req.body.userId;
+        console.log(req.params.applicantId);
+        const id =await getUserIdByApplicantId(req.params.applicantId);
+        console.log(id);
+        console.log(userId);
+        if(userId !== (id?.toString())){    
             res.status(403).send({message:'Unauthorized'});
             return;
-        }
+        };
+        const applicantId = req.params.applicantId;
         const result = await offerServices.getOffersByApplicantId(applicantId);
         res.status(200).send(result);
     }
@@ -55,9 +62,10 @@ export const getOffersByApplicantId = async (req: Request, res: Response,next:Ne
 
 export const getOffersByRequestId = async (req: Request, res: Response,next:NextFunction) => {
     try{
-        const clientId = req.body.userId;
-        const requestClientId =await  requsetServices.getClientIdFromRequestId(req.params.requestId);
-        if(clientId !== requestClientId){
+        const userId = req.body.userId;
+        const clientId = await requsetServices.getClientIdFromRequestId(req.params.requestId);
+        const id= await getUserByClient(clientId);
+        if(userId !== (id?.toString())){
             res.status(403).send({message:'Unauthorized'});
             return;
         }
@@ -84,9 +92,10 @@ export const getOffers = async (req: Request, res: Response,next:NextFunction) =
 export const getApplicantsByRequestId = async (req: Request, res: Response,next:NextFunction) => {
     try{
         const requestId = req.params.requestId;
-        const clientId = req.body.userId;
+        const userId = req.body.userId;
         const requestClientId =await  requsetServices.getClientIdFromRequestId(requestId);
-        if(clientId !== requestClientId){
+        const clientId = await getUserByClient(requestClientId);
+        if(userId !== (clientId?.toString())){
             res.status(403).send({message:'Unauthorized'});
             return;
         }
@@ -102,17 +111,16 @@ export const updateOffer = async (req: Request, res: Response,next:NextFunction)
     try{
         const offerId = req.params.offerId;
         const id = req.body.userId;
-        const requestId = await offerServices.getRequestIdFromOfferId(offerId);
-        const clientId = await requsetServices.getClientIdFromRequestId(requestId);
-        if(id !== clientId){
-            res.status(403).send({message:'Unauthorized'});
-            return;
-        }
         const offer = req.body as IOffer;
         const validatedOffer = await OfferSchema.parseAsync(offer) as unknown as IOffer;
         const result = await offerServices.updateOffer(offerId,validatedOffer);
         if(!result){
             res.status(404).send({message:'Offer not found'});
+            return;
+        }
+        const userId = await getUserIdByApplicantId(result.applicantId.toString());
+        if(id !== userId?.toString()){
+            res.status(403).send({message:'Unauthorized'});
             return;
         }
         res.status(200).send(result);
@@ -131,7 +139,8 @@ export const deleteOffer = async (req: Request, res: Response,next:NextFunction)
         const id = req.body.userId;
         const requestId = await offerServices.getRequestIdFromOfferId(req.params.offerId);
         const clientId = await requsetServices.getClientIdFromRequestId(requestId);
-        if(id !== clientId){
+        const userId = await getUserByClient(clientId);
+        if(id !== userId?.toString()){
             res.status(403).send({message:'Unauthorized'});
             return;
         }
@@ -165,9 +174,10 @@ export const selectOffer = async (req: Request, res: Response,next:NextFunction)
 
 export const deleteOfferByApplicantId = async (req: Request, res: Response,next:NextFunction) => {
     try{
-        const userId = req.params.userId;
-        const applicantId = req.body.userId;
-        if(userId !== applicantId){
+        const applicantId = req.params.userId;
+        const userId = req.body.userId;
+        const id = await getUserIdByApplicantId(userId);  
+        if(userId !== (id?.toString())){
             res.status(403).send({message:'Unauthorized'});
             return;
         }
@@ -185,9 +195,10 @@ export const deleteOfferByApplicantId = async (req: Request, res: Response,next:
 
 export const deleteOfferByRequestId = async (req: Request, res: Response,next:NextFunction) => {
     try{
-        const clientId = req.body.userId;
-        const requestClientId = await requsetServices.getClientIdFromRequestId(req.params.requestId);
-        if(clientId !== requestClientId){
+        const userId = req.body.userId;
+        const clientId = await requsetServices.getClientIdFromRequestId(req.params.requestId);
+        const id = await getUserByClient(clientId);
+        if(userId !== (id?.toString())){
             res.status(403).send({message:'Unauthorized'});
             return;
         }
