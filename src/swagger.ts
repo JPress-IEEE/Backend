@@ -152,7 +152,7 @@ const swaggerOptions: swaggerJsDoc.Options = {
                     properties: {
                         _id: { type: 'string' },
                         requestId: { type: 'string' },
-                        applicantS:{
+                        applicants:{
                             type: 'array',
                             items: {
                                 type: 'string'
