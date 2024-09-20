@@ -1,14 +1,12 @@
 import * as recommendationController from '../controllers/recommendation.controller';
 import { Router } from 'express';
+import { adminRoleMiddleware,authMiddleware } from '../middlewares/auth.middleware';
 
-/*
+
 const recommendationRouter = Router();
 
-recommendationRouter.get('/', recommendationController.getRecommendations);
-recommendationRouter.get('/:id', recommendationController.getRecommendation);
-recommendationRouter.post('/', recommendationController.createRecommendation);
-recommendationRouter.put('/:id', recommendationController.updateRecommendation);
-recommendationRouter.delete('/:id', recommendationController.deleteRecommendation);
-
+recommendationRouter.get('/:id',authMiddleware, recommendationController.getRecommendationById);
+recommendationRouter.get('/request/:id',authMiddleware, recommendationController.getRecommendationByRequestId);
+recommendationRouter.post('/ai',authMiddleware, recommendationController.getAIRecommendation);
 export default recommendationRouter;
-*/
+

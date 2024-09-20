@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response ,NextFunction} from 'express';
 import { createUser, getUserByEmail, getUserById, updateUser } from '../services/user.services';
 import { IUser } from '../models/user.model';
 import { userSchema } from '../schemas/user.schema';
@@ -7,7 +7,7 @@ import { sendEmail, generateEmailToken, verifyEmailToken } from '../utils/email.
 import bcrypt from 'bcrypt';
 import config from "config";
 
-export const createUserController = async (req: Request, res: Response) => {
+export const createUserController = async (req: Request, res: Response , next:NextFunction) => {
     try {
         const validatedData = userSchema.parse(req.body);
         const userExists = await getUserByEmail(validatedData.email);
@@ -32,17 +32,17 @@ export const createUserController = async (req: Request, res: Response) => {
         });
         const accessToken = generateToken(userId);
         const emailToken = generateEmailToken(userId);
-        const url = `http://localhost:3000/auth/confirm-email?token=${emailToken}`;
+        const url = `http://localhost:3002/api/auth/confirm-email?token=${emailToken}`;
         const emailText = `Click this link to confirm your email: ${url}`;
         await sendEmail(validatedData.email, 'Confirm Email', emailText);
 
         return res.status(201).send({ message: 'User created successfully', accessToken });
     } catch (err: any) {
-        return res.status(500).send({ message: err.message });
+        next(err);
     }
 };
 
-export const confirmEmail = async (req: Request, res: Response) => {
+export const confirmEmail = async (req: Request, res: Response ,next:NextFunction) => {
     const token = req.query.token;
     if (!token) {
         return res.status(400).json({ msg: 'No token provided' });
@@ -62,11 +62,11 @@ export const confirmEmail = async (req: Request, res: Response) => {
         await user.save();
         res.json({ msg: 'Email confirmed successfully' });
     } catch (err: any) {
-        res.status(500).json({ msg: 'Server error' });
+        next(err);
     }
 };
 
-export const loginController = async (req: Request, res: Response) => {
+export const loginController = async (req: Request, res: Response , next:NextFunction) => {
     try {
         const { email, password } = req.body;
         const user = await getUserByEmail(email);
@@ -94,26 +94,28 @@ export const loginController = async (req: Request, res: Response) => {
         });
         return res.status(200).send({ message: 'Login successful', accessToken });
     } catch (err: any) {
-        return res.status(500).send({ message: err.message });
+        next(err);
     }
 };
 
-export const logoutController = async (req: Request, res: Response) => {
+export const logoutController = async (req: Request, res: Response , next :NextFunction) => {
     res.clearCookie('refreshToken');
     return res.status(200).send({ message: 'Logged out successfully' });
 };
 
-export const refreshTokenController = async (req: Request, res: Response) => {
+export const refreshTokenController = async (req: Request, res: Response,next:NextFunction) => {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
         return res.status(400).send({ message: 'No refresh token provided' });
     }
     try {
+
         const decoded = verifyToken(refreshToken) as any;
+        console.log('decoded', decoded);
         if (!decoded) {
             return res.status(400).send({ message: 'Invalid refresh token' });
         }
-        const userId = decoded.userId;
+        const userId = decoded.user.id;
         const user = await getUserById(userId);
         if (!user) {
             return res.status(400).send({ message: 'User not found' });
@@ -121,11 +123,11 @@ export const refreshTokenController = async (req: Request, res: Response) => {
         const accessToken = generateToken(userId);
         return res.status(200).send({ message: 'Access token generated successfully', accessToken });
     } catch (err: any) {
-        return res.status(500).send({ message: err.message });
+       next(err);
     }
 };
 
-export const passport_Auth = async (req: Request, res: Response) => {
+export const passport_Auth = async (req: Request, res: Response ,next:NextFunction) => {
     let user: IUser = req.user as IUser;
     const accessToken = generateToken((user._id as string).toString());
     const refreshToken = generateRefreshToken((user._id as string).toString());

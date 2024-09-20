@@ -8,6 +8,8 @@ import userRouter from './routes/user.route';
 import applicantRouter from './routes/applicant.route';
 import clientRouter from './routes/client.route';
 import requestRouter from './routes/request.route';
+import recommendationRouter from './routes/recommendation.route';
+import offerRouter from './routes/offer.route';
 import passport from './utils/passport.utils';
 import session from 'express-session';
 import { zodErrorHandler } from './middlewares/zodErrorHandler';
@@ -26,6 +28,8 @@ dbConnect();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use(session({
     secret: process.env.SESSION_SECRET!,
@@ -46,6 +50,9 @@ app.use('/api/auth', userRouter);
 app.use('/api/applicant', applicantRouter);
 app.use('/api/client', clientRouter);
 app.use('/api/request', requestRouter);
+app.use('/api/offer', offerRouter);
+app.use('/api/recommendation', recommendationRouter);
+
 
 app.use(zodErrorHandler);
 app.use(multerErrorHandler);

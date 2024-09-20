@@ -1,9 +1,15 @@
 import multer from 'multer';
 import path from 'path';
+import fs from 'fs';
+
+const uploadsDir = path.join(__dirname, '../uploads');
 
 const profilePicStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/profile-pics/');
+        const dir = path.join(uploadsDir, 'profile-pics');
+      
+        fs.mkdirSync(dir, { recursive: true });
+        cb(null, dir);
     },
     filename: (req, file, cb) => {
         const filename = `profile-pic-${Date.now()}${path.extname(file.originalname)}`;
@@ -13,13 +19,17 @@ const profilePicStorage = multer.diskStorage({
 
 const resumeStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/resumes/');
+        const dir = path.join(uploadsDir, 'resumes');
+
+        fs.mkdirSync(dir, { recursive: true });
+        cb(null, dir);
     },
     filename: (req, file, cb) => {
         const filename = `resume-${Date.now()}${path.extname(file.originalname)}`;
         cb(null, filename);
     },
 });
+
 const profilePicUpload = multer({
     storage: profilePicStorage,
     fileFilter: (req, file, cb) => {

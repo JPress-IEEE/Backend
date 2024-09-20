@@ -6,5 +6,5 @@ export const ApplicantSchema = z.object({
     location: z.string(),
     summary: z.string(),
     jobName: z.string(),
-    payoutAccountId: z.string(),
+    payoutAccountId: z.string().optional()
 });

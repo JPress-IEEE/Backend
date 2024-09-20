@@ -17,6 +17,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
         if (!user) {
             return res.status(401).send({ message: 'User not found' });
         }
+        req.body.userId = userId;
         next();
     }
     catch (err) {
@@ -51,6 +52,35 @@ export const clientRoleoleMiddleware = async (req: Request, res: Response, next:
 };
 
 export const applicantRoleMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        const accessToken = req.headers.authorization?.split(' ')[1];
+        if (!accessToken) {
+            return res.status(401).send({ message: 'Access token not found' });
+        }
+        const decoded = verifyToken(accessToken) as {
+            [x: string]: any; userId: string
+        };
+        const userId: string = decoded.user.id as string;
+        console.log(userId);
+        const user = await getUserById(userId);
+        if (!user) {
+            return res.status(401).send({ message: 'User not found' });
+        }
+        if (user.role !== 'applicant') {
+            return res.status(403).send({ message: 'Unauthorized' });
+        }
+        
+        req.body.userId = userId;
+        req.body.role = user.role;
+        next();
+    }
+    catch (err) {
+        next(err);
+    }
+};
+
+export const adminRoleMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const accessToken = req.headers.authorization?.split(' ')[1];
         if (!accessToken) {
@@ -64,7 +94,7 @@ export const applicantRoleMiddleware = async (req: Request, res: Response, next:
         if (!user) {
             return res.status(401).send({ message: 'User not found' });
         }
-        if (user.role !== 'applicant') {
+        if (user.role !== 'admin') {
             return res.status(403).send({ message: 'Unauthorized' });
         }
         req.body.userId = userId;

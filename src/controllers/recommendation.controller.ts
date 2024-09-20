@@ -1,33 +1,68 @@
 import { Request, Response } from 'express';
 import * as recommendationServices from '../services/recommendation.services';
 import { IRecommendation } from '../models/recommendation.model';
-import {RecommendationSchema} from '../schemas/recommendation.schema';
-import axios from 'axios';
-
-/*
-export const getAIRecommendation = async (req: Request, res: Response): Promise<void> => {
-};
-
-export const createRecommendation = async (req: Request, res: Response): Promise<void> => {
-};
 
 export const getRecommendationById = async (req: Request, res: Response): Promise<void> => {
-    
+    try {
+        const recommendationId = req.params.id;
+        const recommendation = await recommendationServices.getRecommendationById(recommendationId);
+
+        if (!recommendation) {
+            res.status(404).json({ message: 'Recommendation not found' });
+            return;
+        }
+
+        res.status(200).json(recommendation);
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
 }
 
-export const getRecommendationByUserId = async (req: Request, res: Response): Promise<void> => {
-    
+export const getRecommendationByRequestId = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const requestId = req.params.id;
+        const recommendation = await recommendationServices.getRecommendationByRequestId(requestId);
+
+        if (!recommendation) {
+            res.status(404).json({ message: 'Recommendation not found for this request' });
+            return;
+        }
+
+        res.status(200).json(recommendation);
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
 }
 
-export const upadateRecommendation = async (req: Request, res: Response): Promise<void> => {
+export const getAIRecommendation = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const description = req.body.description;
+        const requestId = req.body.requestId;
+
+        if (!description) {
+            res.status(400).json({ message: 'Description is required' });
+            return;
+        }
+
+        const recommendations = await recommendationServices.getAIRecommendation(requestId,description);
+        res.status(200).json(recommendations);
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
 }
 
-export const deleteRecommendation = async (req: Request, res: Response): Promise<void> => {
-}
+export const createRecommendation = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const recommendation: IRecommendation = req.body;
 
-export const deleteRecommendationByUserId = async (req: Request, res: Response): Promise<void> => {
-}
+        if (!recommendation) {
+            res.status(400).json({ message: 'Recommendation data is required' });
+            return;
+        }
 
-export const getRecommendations = async (req: Request, res: Response): Promise<void> => {
+        const newRecommendation = await recommendationServices.createRecommendation(recommendation);
+        res.status(201).json(newRecommendation);
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
 }
-*/
