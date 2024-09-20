@@ -203,6 +203,7 @@ describe("applicant routes", ()=>{
             expect(response.body).toEqual(applicant);
         });
         it("should return 500 if updateApplicant throws an error", async ()=>{
+            (applicantServices.getApplicantByUserId as jest.Mock).mockResolvedValue({});
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
                 req.body.userId = "1";
@@ -240,6 +241,8 @@ describe("applicant routes", ()=>{
             expect(response.body).toEqual(applicant);
         });
         it("should return 500 if deleteApplicant throws an error", async ()=>{
+            (applicantServices.getApplicantByUserId as jest.Mock).mockResolvedValue({userId: "1"});
+            ( getEmailByApplicantId as jest.Mock).mockResolvedValue("email");
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
                 req.body.userId = "1";
