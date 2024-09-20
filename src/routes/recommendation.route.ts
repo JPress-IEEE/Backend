@@ -8,7 +8,5 @@ const recommendationRouter = Router();
 recommendationRouter.get('/:id',authMiddleware, recommendationController.getRecommendationById);
 recommendationRouter.get('/request/:id',authMiddleware, recommendationController.getRecommendationByRequestId);
 recommendationRouter.post('/ai',authMiddleware, recommendationController.getAIRecommendation);
-recommendationRouter.post('/store/:id',authMiddleware, recommendationController.storeAIRecommendationsForRequest);
-
 export default recommendationRouter;
 

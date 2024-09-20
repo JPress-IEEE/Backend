@@ -37,31 +37,15 @@ export const getRecommendationByRequestId = async (req: Request, res: Response):
 export const getAIRecommendation = async (req: Request, res: Response): Promise<void> => {
     try {
         const description = req.body.description;
+        const requestId = req.body.requestId;
 
         if (!description) {
             res.status(400).json({ message: 'Description is required' });
             return;
         }
 
-        const recommendations = await recommendationServices.getAIRecommendation(description);
+        const recommendations = await recommendationServices.getAIRecommendation(requestId,description);
         res.status(200).json(recommendations);
-    } catch (error: any) {
-        res.status(500).json({ message: error.message });
-    }
-}
-
-export const storeAIRecommendationsForRequest = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const requestId = req.params.id;
-        const description = req.body.description;
-
-        if (!description) {
-            res.status(400).json({ message: 'Description is required' });
-            return;
-        }
-
-        const recommendation = await recommendationServices.storeAIRecommendationsForRequest(requestId, description);
-        res.status(200).json(recommendation);
     } catch (error: any) {
         res.status(500).json({ message: error.message });
     }
