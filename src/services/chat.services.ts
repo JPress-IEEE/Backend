@@ -6,8 +6,10 @@ const createChat = async (participant1_id: string, participant2_id: string) => {
   if (!validationChat.success) throw new Error(validationChat.error.message);
 
   const existingChat = await Chat.findOne({
-    participant1_id,
-    participant2_id,
+    $or: [
+      { participant1_id, participant2_id },
+      { participant1_id: participant2_id, participant2_id: participant1_id },
+    ],
   });
 
   if (existingChat) {
