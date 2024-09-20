@@ -7,6 +7,8 @@ import { ZodError } from "zod";
 import offerRouter from "../routes/offer.route";
 import { get } from "axios";
 import * as requestServices from "../services/request.services";
+import {getUserIdByApplicantId} from '../services/applicant.services';
+import { getUserByClient} from '../services/client.services';
 
 jest.mock("../middlewares/auth.middleware", () => ({
     authMiddleware: jest.fn(),
@@ -31,6 +33,7 @@ jest.mock("../services/offer.services", () => ({
     getOffersByRequestId: jest.fn(),
     getApplicantsByRequestId: jest.fn(),
     selectOffer: jest.fn(),
+    getRequestIdFromOfferId: jest.fn(),
 }));
 
 jest.mock("../schemas/offer.schema", () => ({
@@ -38,6 +41,14 @@ jest.mock("../schemas/offer.schema", () => ({
         parse: jest.fn(),
         parseAsync: jest.fn(),
     }
+}));
+
+jest.mock("../services/applicant.services", () => ({
+    getUserIdByApplicantId: jest.fn(),
+}));
+
+jest.mock("../services/client.services", () => ({
+    getUserByClient: jest.fn(),
 }));
 
 const app = express();
@@ -58,7 +69,7 @@ describe("Offer routes", () => {
         test("should return an offer by id", async () => {
             const offer = {};
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (adminRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (offerServices.getOfferById as jest.Mock).mockResolvedValue(offer);
             const response = await request(app).get("/api/offer/1");
         });
@@ -67,7 +78,7 @@ describe("Offer routes", () => {
         test("should create an offer", async () => {
             const offer = {};
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (OfferSchema.parseAsync as jest.Mock).mockResolvedValue(offer);
             (offerServices.createOffer as jest.Mock).mockResolvedValue(offer);
             const response = await request(app).post("/api/offer").send(offer);
@@ -76,81 +87,70 @@ describe("Offer routes", () => {
     describe("PUT /api/offer/:offerId", () => {
         test("should update an offer", async () => {
             const offer = {};
+            (getUserIdByApplicantId as jest.Mock).mockResolvedValue("1");
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (offerServices.updateOffer as jest.Mock).mockResolvedValue(offer);
             const response = await request(app).put("/api/offer/1").send(offer);
         });
     });
     describe("DELETE /api/offer/:offerId", () => {
         test("should delete an offer", async () => {
-            const offer = {};
+            (offerServices.getRequestIdFromOfferId as jest.Mock).mockResolvedValue("1");
+            (requestServices.getClientIdFromRequestId as jest.Mock).mockResolvedValue("1");   
+            (getUserByClient as jest.Mock).mockResolvedValue("1");
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (offerServices.deleteOffer as jest.Mock).mockResolvedValue(offer);
+            (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (offerServices.deleteOffer as jest.Mock).mockResolvedValue({});
             const response = await request(app).delete("/api/offer/1");
         });
     });
     describe("DELETE /api/offer/request/:requestId", () => {
         test("should delete an offer by request id", async () => {
-            const offer = {};
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (requestServices.getClientIdFromRequestId as jest.Mock).mockResolvedValue("1");
-            (offerServices.deleteOfferByRequestId as jest.Mock).mockResolvedValue(offer);
-            const response = await request(app).delete("/api/offer/request/1");
-        });
-    });
-    describe("GET /api/offer/applicant/:applicantId", () => {
-        test("should return offers by applicant id", async () => {
-            const offers = [{}, {}];
+            (offerServices.getRequestIdFromOfferId as jest.Mock).mockResolvedValue("1");
+            (requestServices.getClientIdFromRequestId as jest.Mock).mockResolvedValue("1");   
+            (getUserByClient as jest.Mock).mockResolvedValue("1");
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (offerServices.getOffersByApplicantId as jest.Mock).mockResolvedValue(offers);
-            const response = await request(app).get("/api/offer/applicant/1");
+            (offerServices.deleteOfferByRequestId as jest.Mock).mockResolvedValue({});
+            const response = await request(app).delete("/api/offer/request/1");
         });
     });
     describe("DELETE /api/offer/applicant/:applicantId", () => {
         test("should delete an offer by applicant id", async () => {
-            const offer = {};
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (offerServices.deleteOfferByApplicantId as jest.Mock).mockResolvedValue(offer);
+            (offerServices.deleteOfferByApplicantId as jest.Mock).mockResolvedValue({});
             const response = await request(app).delete("/api/offer/applicant/1");
         });
     });
     describe("GET /api/offer/request/:requestId", () => {
         test("should return offers by request id", async () => {
-            const offers = [{}, {}];
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (requestServices.getClientIdFromRequestId as jest.Mock).mockResolvedValue("1");
-            (offerServices.getOffersByRequestId as jest.Mock).mockResolvedValue(offers);
+            (offerServices.getOffersByRequestId as jest.Mock).mockResolvedValue({});
             const response = await request(app).get("/api/offer/request/1");
         });
     });
     describe("GET /api/offer/request/:requestId/applicants", () => {
         test("should return applicants by request id", async () => {
-            const applicants = [{}, {}];
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (requestServices.getClientIdFromRequestId as jest.Mock).mockResolvedValue("1");
-            (offerServices.getApplicantsByRequestId as jest.Mock).mockResolvedValue(applicants);
+            (offerServices.getApplicantsByRequestId as jest.Mock).mockResolvedValue({});
             const response = await request(app).get("/api/offer/request/1/applicants");
         });
     });
     describe("PUT /api/offer/:offerId/select", () => {
         test("should select an offer", async () => {
-            const offer = {};
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (offerServices.selectOffer as jest.Mock).mockResolvedValue(offer);
+            (offerServices.selectOffer as jest.Mock).mockResolvedValue({});
             const response = await request(app).put("/api/offer/1/select");
         });
     });
 });
 
-describe("Offer routes error handling", () => {
+describe("Offer routes errors", () => {
     describe("GET /api/offer", () => {
         test("should return 500 if getOffers throws an error", async () => {
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
@@ -163,7 +163,7 @@ describe("Offer routes error handling", () => {
     describe("GET /api/offer/:offerId", () => {
         test("should return 500 if getOfferById throws an error", async () => {
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (adminRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (offerServices.getOfferById as jest.Mock).mockRejectedValue(new Error());
             const response = await request(app).get("/api/offer/1");
             expect(response.status).toBe(500);
@@ -171,73 +171,33 @@ describe("Offer routes error handling", () => {
     });
     describe("POST /api/offer", () => {
         test("should return 500 if createOffer throws an error", async () => {
-            const offer = {};
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (OfferSchema.parseAsync as jest.Mock).mockResolvedValue(offer);
+            (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (OfferSchema.parseAsync as jest.Mock).mockResolvedValue({});
             (offerServices.createOffer as jest.Mock).mockRejectedValue(new Error());
-            const response = await request(app).post("/api/offer").send(offer);
+            const response = await request(app).post("/api/offer");
             expect(response.status).toBe(500);
         });
-        test("should return 400 if the request is invalid", async () => {
-            const offer = {};
+        test("should return 400 if schema validation fails", async () => {
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (OfferSchema.parseAsync as jest.Mock).mockRejectedValue(new ZodError([]));
-            const response = await request(app).post("/api/offer").send(offer);
+            const response = await request(app).post("/api/offer");
             expect(response.status).toBe(400);
         });
     });
     describe("PUT /api/offer/:offerId", () => {
         test("should return 500 if updateOffer throws an error", async () => {
-            const offer = {};
+            (getUserIdByApplicantId as jest.Mock).mockResolvedValue("1");
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (offerServices.updateOffer as jest.Mock).mockRejectedValue(new Error());
-            const response = await request(app).put("/api/offer/1").send(offer);
-            expect(response.status).toBe(500);
-        });
-    });
-    describe("DELETE /api/offer/:offerId", () => {
-        test("should return 500 if deleteOffer throws an error", async () => {
-            const offer = {};
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (offerServices.deleteOffer as jest.Mock).mockRejectedValue(new Error());
-            const response = await request(app).delete("/api/offer/1");
-            expect(response.status).toBe(500);
-        });
-    });
-    describe("DELETE /api/offer/request/:requestId", () => {
-        test("should return 500 if deleteOfferByRequestId throws an error", async () => {
-            const offer = {};
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) =>{
-                req.body.userId = "1";
-                next();
-            });
-            (requestServices.getClientIdFromRequestId as jest.Mock).mockResolvedValue("1");
-            (offerServices.deleteOfferByRequestId as jest.Mock).mockRejectedValue(new Error());
-            const response = await request(app).delete("/api/offer/request/1");
-            console.log(response.body);
-            expect(response.status).toBe(500);
-        });
-    });
-    describe("GET /api/offer/applicant/:applicantId", () => {
-        test("should return 500 if getOffersByApplicantId throws an error", async () => {
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
-                req.body.userId = "1";
-                next();
-            });
-            (offerServices.getOffersByApplicantId as jest.Mock).mockRejectedValue(new Error());
-            const response = await request(app).get("/api/offer/applicant/1");
+            const response = await request(app).put("/api/offer/1");
             expect(response.status).toBe(500);
         });
     });
     describe("DELETE /api/offer/applicant/:applicantId", () => {
         test("should return 500 if deleteOfferByApplicantId throws an error", async () => {
-            const offer = {};
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (offerServices.deleteOfferByApplicantId as jest.Mock).mockRejectedValue(new Error());
@@ -248,11 +208,7 @@ describe("Offer routes error handling", () => {
     describe("GET /api/offer/request/:requestId", () => {
         test("should return 500 if getOffersByRequestId throws an error", async () => {
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
-                req.body.userId = "1";
-                next();
-            });
-            (requestServices.getClientIdFromRequestId as jest.Mock).mockResolvedValue("1");
+            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (offerServices.getOffersByRequestId as jest.Mock).mockRejectedValue(new Error());
             const response = await request(app).get("/api/offer/request/1");
             expect(response.status).toBe(500);
@@ -261,11 +217,7 @@ describe("Offer routes error handling", () => {
     describe("GET /api/offer/request/:requestId/applicants", () => {
         test("should return 500 if getApplicantsByRequestId throws an error", async () => {
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => {
-                req.body.userId = "1";
-                next();
-            });
-            (requestServices.getClientIdFromRequestId as jest.Mock).mockResolvedValue("1");
+            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (offerServices.getApplicantsByRequestId as jest.Mock).mockRejectedValue(new Error());
             const response = await request(app).get("/api/offer/request/1/applicants");
             expect(response.status).toBe(500);
@@ -273,7 +225,6 @@ describe("Offer routes error handling", () => {
     });
     describe("PUT /api/offer/:offerId/select", () => {
         test("should return 500 if selectOffer throws an error", async () => {
-            const offer = {};
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (offerServices.selectOffer as jest.Mock).mockRejectedValue(new Error());
@@ -283,93 +234,153 @@ describe("Offer routes error handling", () => {
     });
 });
 
-describe("Offer routes authorization", () => {
+describe("Offer authorization", () => { 
     describe("GET /api/offer", () => {
-        test("should return 401 if authMiddleware returns an error", async () => {
+        test("should return 401 if no access token is provided", async () => {
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).send());
+            (adminRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             const response = await request(app).get("/api/offer");
             expect(response.status).toBe(401);
         });
     });
     describe("GET /api/offer/:offerId", () => {
-        test("should return 401 if authMiddleware returns an error", async () => {
+        test("should return 401 if no access token is provided", async () => {
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).send());
+            (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             const response = await request(app).get("/api/offer/1");
             expect(response.status).toBe(401);
         });
     });
     describe("POST /api/offer", () => {
-        test("should return 401 if authMiddleware returns an error", async () => {
+        test("should return 401 if no access token is provided", async () => {
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).send());
+            (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             const response = await request(app).post("/api/offer");
             expect(response.status).toBe(401);
         });
-        test("should return 403 if clientRoleoleMiddleware returns an error", async () => {
+    });
+    describe("PUT /api/offer/:offerId", () => {
+        test("should return 401 if no access token is provided", async () => {
+            (getUserIdByApplicantId as jest.Mock).mockResolvedValue("1");
+            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).send());
+            (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (offerServices.updateOffer as jest.Mock).mockResolvedValue({});
+            const response = await request(app).put("/api/offer/1");
+            expect(response.status).toBe(401);
+        });
+    });
+    describe("DELETE /api/offer/:offerId", () => {
+        test("should return 401 if no access token is provided", async () => {
+            (offerServices.getRequestIdFromOfferId as jest.Mock).mockResolvedValue("1");
+            (requestServices.getClientIdFromRequestId as jest.Mock).mockResolvedValue("1");
+            (getUserByClient as jest.Mock).mockResolvedValue("1");
+            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).send());
+            (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            const response = await request(app).delete("/api/offer/1");
+            expect(response.status).toBe(401);
+        });
+    });
+    describe("DELETE /api/offer/request/:requestId", () => {
+        test("should return 401 if no access token is provided", async () => {
+            (offerServices.getRequestIdFromOfferId as jest.Mock).mockResolvedValue("1");
+            (requestServices.getClientIdFromRequestId as jest.Mock).mockResolvedValue("1");
+            (getUserByClient as jest.Mock).mockResolvedValue("1");
+            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).send());
+            (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            const response = await request(app).delete("/api/offer/request/1");
+            expect(response.status).toBe(401);
+        });
+    });
+    describe("DELETE /api/offer/applicant/:applicantId", () => {
+        test("should return 401 if no access token is provided", async () => {
+            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).send());
+            (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            const response = await request(app).delete("/api/offer/applicant/1");
+            expect(response.status).toBe(401);
+        });
+    });
+    describe("GET /api/offer/request/:requestId", () => {
+        test("should return 401 if no access token is provided", async () => {
+            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).send());
+            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (offerServices.getOffersByRequestId as jest.Mock).mockResolvedValue({});
+            const response = await request(app).get("/api/offer/request/1");
+            expect(response.status).toBe(401);
+        });
+    });
+    describe("GET /api/offer/request/:requestId/applicants", () => {
+        test("should return 401 if no access token is provided", async () => {
+            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).send());
+            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            const response = await request(app).get("/api/offer/request/1/applicants");
+            expect(response.status).toBe(401);
+        });
+    });
+    describe("PUT /api/offer/:offerId/select", () => {
+        test("should return 401 if no access token is provided", async () => {
+            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).send());
+            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            const response = await request(app).put("/api/offer/1/select");
+            expect(response.status).toBe(401);
+        });
+    });
+    describe("GET /api/offer", () => {
+        test("should return 401 if user is not an admin", async () => {
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(403).send());
+            (adminRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(403).send());
+            const response = await request(app).get("/api/offer");
+            expect(response.status).toBe(403);
+        });
+    });
+    describe("GET /api/offer/:offerId", () => {
+        test("should return 401 if user is not an applicant", async () => {
+            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(403).send());
+            const response = await request(app).get("/api/offer/1");
+            expect(response.status).toBe(403);
+        });
+    });
+    describe("POST /api/offer", () => {
+        test("should return 401 if user is not an applicant", async () => {
+            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
+            (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(403).send());
             const response = await request(app).post("/api/offer");
             expect(response.status).toBe(403);
         });
     });
     describe("PUT /api/offer/:offerId", () => {
-        test("should return 401 if authMiddleware returns an error", async () => {
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).send());
-            const response = await request(app).put("/api/offer/1");
-            expect(response.status).toBe(401);
-        });
-        test("should return 403 if clientRoleoleMiddleware returns an error", async () => {
+        test("should return 401 if user is not an applicant", async () => {
+            (getUserIdByApplicantId as jest.Mock).mockResolvedValue("1");
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(403).send());
+            (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(403).send());
             const response = await request(app).put("/api/offer/1");
             expect(response.status).toBe(403);
         });
     });
     describe("DELETE /api/offer/:offerId", () => {
-        test("should return 401 if authMiddleware returns an error", async () => {
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).send());
-            const response = await request(app).delete("/api/offer/1");
-            expect(response.status).toBe(401);
-        });
-        test("should return 403 if clientRoleoleMiddleware returns an error", async () => {
+        test("should return 401 if user is not an applicant", async () => {
+            (offerServices.getRequestIdFromOfferId as jest.Mock).mockResolvedValue("1");
+            (requestServices.getClientIdFromRequestId as jest.Mock).mockResolvedValue("1");
+            (getUserByClient as jest.Mock).mockResolvedValue("1");
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(403).send());
+            (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(403).send());
             const response = await request(app).delete("/api/offer/1");
             expect(response.status).toBe(403);
         });
     });
     describe("DELETE /api/offer/request/:requestId", () => {
-        test("should return 401 if authMiddleware returns an error", async () => {
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).send());
-            const response = await request(app).delete("/api/offer/request/1");
-            expect(response.status).toBe(401);
-        });
-        test("should return 403 if clientRoleoleMiddleware returns an error", async () => {
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
-            (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(403).send());
-            const response = await request(app).delete("/api/offer/request/1");
-            expect(response.status).toBe(403);
-        });
-    });
-    describe("GET /api/offer/applicant/:applicantId", () => {
-        test("should return 401 if authMiddleware returns an error", async () => {
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).send());
-            const response = await request(app).get("/api/offer/applicant/1");
-            expect(response.status).toBe(401);
-        });
-        test("should return 403 if applicantRoleMiddleware returns an error", async () => {
+        test("should return 401 if user is not an applicant", async () => {
+            (offerServices.getRequestIdFromOfferId as jest.Mock).mockResolvedValue("1");
+            (requestServices.getClientIdFromRequestId as jest.Mock).mockResolvedValue("1");
+            (getUserByClient as jest.Mock).mockResolvedValue("1");
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(403).send());
-            const response = await request(app).get("/api/offer/applicant/1");
+            const response = await request(app).delete("/api/offer/request/1");
             expect(response.status).toBe(403);
         });
     });
     describe("DELETE /api/offer/applicant/:applicantId", () => {
-        test("should return 401 if authMiddleware returns an error", async () => {
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).send());
-            const response = await request(app).delete("/api/offer/applicant/1");
-            expect(response.status).toBe(401);
-        });
-        test("should return 403 if applicantRoleMiddleware returns an error", async () => {
+        test("should return 401 if user is not an applicant", async () => {
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (applicantRoleMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(403).send());
             const response = await request(app).delete("/api/offer/applicant/1");
@@ -377,12 +388,7 @@ describe("Offer routes authorization", () => {
         });
     });
     describe("GET /api/offer/request/:requestId", () => {
-        test("should return 401 if authMiddleware returns an error", async () => {
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).send());
-            const response = await request(app).get("/api/offer/request/1");
-            expect(response.status).toBe(401);
-        });
-        test("should return 403 if clientRoleoleMiddleware returns an error", async () => {
+        test("should return 401 if user is not a client", async () => {
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(403).send());
             const response = await request(app).get("/api/offer/request/1");
@@ -390,12 +396,7 @@ describe("Offer routes authorization", () => {
         });
     });
     describe("GET /api/offer/request/:requestId/applicants", () => {
-        test("should return 401 if authMiddleware returns an error", async () => {
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).send());
-            const response = await request(app).get("/api/offer/request/1/applicants");
-            expect(response.status).toBe(401);
-        });
-        test("should return 403 if clientRoleoleMiddleware returns an error", async () => {
+        test("should return 401 if user is not a client", async () => {
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(403).send());
             const response = await request(app).get("/api/offer/request/1/applicants");
@@ -403,12 +404,7 @@ describe("Offer routes authorization", () => {
         });
     });
     describe("PUT /api/offer/:offerId/select", () => {
-        test("should return 401 if authMiddleware returns an error", async () => {
-            (authMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(401).send());
-            const response = await request(app).put("/api/offer/1/select");
-            expect(response.status).toBe(401);
-        });
-        test("should return 403 if clientRoleoleMiddleware returns an error", async () => {
+        test("should return 401 if user is not a client", async () => {
             (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
             (clientRoleoleMiddleware as jest.Mock).mockImplementation((req, res, next) => res.status(403).send());
             const response = await request(app).put("/api/offer/1/select");
@@ -416,3 +412,5 @@ describe("Offer routes authorization", () => {
         });
     });
 });
+
+   
