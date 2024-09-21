@@ -5,6 +5,6 @@ import { getChatMessages } from "../controllers/chat.controller";
 const router = Router();
 
 router.post("/chat", createChat);
-router.post("/chat/:chatId/messages", getChatMessages);
+router.get("/chat/:chatId/messages", getChatMessages);
 
 export default router;
