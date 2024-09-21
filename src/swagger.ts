@@ -90,6 +90,7 @@ const swaggerOptions: swaggerJsDoc.Options = {
                         _id: { type: 'string' },
                         applicantId: { type: 'string' },
                         clientId: { type: 'string' },
+                        offerId: { type: 'string' },
                         rate: { type: 'number' },
                         comment: { type: 'string' },
                         createdAt: { type: 'string', format: 'date-time' },
