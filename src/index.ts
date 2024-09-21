@@ -20,11 +20,17 @@ import dotenv from 'dotenv';
 import { Server } from 'socket.io';
 import { swaggerUi,swaggerDocs } from './swagger';
 dotenv.config();
+import cors from 'cors';
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 dbConnect();
+
+app.use(cors({
+    origin: '*',
+    credentials: true
+}));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
