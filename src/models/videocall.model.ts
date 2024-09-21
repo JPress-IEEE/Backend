@@ -34,4 +34,5 @@ const videoCallSchema = new Schema<IVideoCall>({
   },
 });
 
-export const VideoCall = mongoose.model<IVideoCall>("VideoCall", videoCallSchema)
+const VideoCall = mongoose.model<IVideoCall>("VideoCall", videoCallSchema)
+export default VideoCall;
