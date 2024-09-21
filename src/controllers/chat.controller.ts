@@ -1,10 +1,14 @@
 import { NextFunction, Request, Response } from "express";
 import * as chatService from "../services/chat.services";
 import * as messageService from "../services/message.services";
+import { chatSchema } from "../schemas/chat.schema";
 
 const createChat = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { participant1_id, participant2_id } = req.body;
+    const validationResult = chatSchema.safeParse(req.body);
+    if (!validationResult.success) return res.status(400).json({ message: validationResult.error.issues[0].message });
+
+    const { participant1_id, participant2_id } = validationResult.data;
     const chat = await chatService.createChat(participant1_id, participant2_id);
     res.status(201).json(chat);
   } catch (error: any) {
