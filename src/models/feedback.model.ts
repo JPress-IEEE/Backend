@@ -1,7 +1,9 @@
 import mongoose from 'mongoose';
+import { off } from 'process';
 export interface IFeedback extends mongoose.Document {
     applicantId: mongoose.Schema.Types.ObjectId,
     clientId: mongoose.Schema.Types.ObjectId,
+    offerId: mongoose.Schema.Types.ObjectId,
     rate: number,
     comment: string,
     createdAt: Date,
@@ -17,6 +19,11 @@ const FeedbackSchema = new mongoose.Schema({
     clientId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Client',
+        required: true
+    },
+    offerId:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Offer',
         required: true
     },
     rate: {

@@ -1,10 +1,11 @@
 import Feedback, { IFeedback } from "../models/feedback.model";
 import { FeedbackSchema } from "../schemas/feedback.schema";
 
-export const createFeedback = async (applicantId: string, clientId: string, rate: number, comment: string) => {
+export const createFeedback = async (applicantId: string, clientId: string, rate: number, comment: string , offerId:string) => {
   const validationFeedback = FeedbackSchema.safeParse({
     applicantId,
     clientId,
+    offerId,
     rate,
     comment,
     createdAt: new Date(),
@@ -16,6 +17,7 @@ export const createFeedback = async (applicantId: string, clientId: string, rate
   const feedback = new Feedback({
     applicantId,
     clientId,
+    offerId,
     rate,
     comment,
   });
@@ -30,8 +32,8 @@ export const getFeedbackById = async (feedbackId: string) => {
   return feedback;
 };
 
-export const getFeedbacks = async () => {
-  const feedbacks = await Feedback.find().sort({ createdAt: "desc" });
+export const getFeedbacksByApplicantId = async (applicantId: string) => {
+  const feedbacks = await Feedback.find({ applicantId });
   return feedbacks;
 };
 
