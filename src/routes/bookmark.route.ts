@@ -3,12 +3,36 @@ import { Router } from 'express';
 import { authMiddleware } from '../middlewares/auth.middleware';
 
 const bookmarkRouter = Router();
-
 /**
  * @swagger
  * tags:
  *   name: Bookmarks
  *   description: Bookmark management for offers
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Bookmark:
+ *       type: object
+ *       required:
+ *         - userId
+ *         - offerId
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: Unique ID of the bookmark
+ *         userId:
+ *           type: string
+ *           description: ID of the user creating the bookmark
+ *         offerId:
+ *           type: string
+ *           description: ID of the offer being bookmarked
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: Timestamp of when the bookmark was created
  */
 
 /**
