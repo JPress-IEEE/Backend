@@ -10,6 +10,8 @@ Welcome to the JPress repository! This project provides backend services for a j
 - **Service Requests & Offers**: Clients post requests and view offers from applicants.
 - **Recommendations**: Suggest applicants based on requests.
 - **Feedback System**: Clients rate and review service providers.
+- **Bookmarks**: Allow users to bookmark offers they are interested in to revisit them later.
+- **Translation**:The translation feature allows translation from various languages to English
 
 ## Technology Stack
 
@@ -59,6 +61,7 @@ Welcome to the JPress repository! This project provides backend services for a j
     EMAIL_PASS=
     EMAIL_SECRET=
     SESSION_SECRET=
+    APP_NAME=
     ```
 
 4. **Build and Start the Server**:
@@ -97,16 +100,9 @@ Access Swagger documentation at:
 
 ## To-Do's 
 
-### Payment and Bookmark Management
+### Payment Management
 
 - **Stripe & paypal Integration**: Implement secure payment processing between clients and applicants. Ensure smooth financial transactions within the platform and introduce models to track payments and transaction history. Develop endpoints for initiating, confirming, and querying payments. Introduce payment notifications to alert users when payments are processed or confirmed.
-
-- **Bookmarking**: Allow users to bookmark offers they are interested in to revisit them later. Build models and endpoints to:
-  - Bookmark an offer.
-  - Retrieve all bookmarks for a user.
-  - Delete bookmarks.
-  Enhance user engagement by making it easier to save and track potential jobs or applicants.
-
 
 ## Contributing
 
