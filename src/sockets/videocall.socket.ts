@@ -10,32 +10,72 @@ const handleVideoCallSockets = (io: Server) => {
       console.log(`User ${socket.id} joined video call room: ${chatId}`);
     });
 
-    socket.on("startCall", async (chatId: string) => {
+    socket.on("requestCall", async (chatId: string, senderId: string, receiverId: string, callback?: (response: any) => void) => {
       try {
-        console.log(`User ${socket.id} is starting a video call for chat ${chatId}`);
+        console.log(`User ${senderId} is requesting a video call with user ${receiverId}`);
 
-        const call = await videocallService.startVideoCall(chatId);
-        io.to(chatId).emit("callStarted: ", call);
+        const call = await videocallService.requestVideoCall(chatId, senderId, receiverId);
 
-        console.log(`Video call started for chat ${chatId}`);
+        io.to(receiverId).emit("incomingCall", {
+          call,
+          from: senderId,
+          message: `User ${senderId} is requesting a video call. Accept or decline?`,
+          callId: call._id,
+        });
+
+        callback?.({ status: "pending", call });
       } catch (error: any) {
-        console.error(`Error starting video call in chat ${chatId}: ${error.message}`);
-        socket.emit("errorStartingCall", error.message);
+        console.error(`Error requesting video call: ${error.message}`);
+        callback?.({ status: "error", message: error.message });
       }
     });
 
-    socket.on("endCall", async (chatId: string) => {
+    socket.on("acceptCall", async (chatId: string, receiverId: string, senderId: string, callback?: (response: any) => void) => {
       try {
-        console.log(`User ${socket.id} is ending a video call for chat ${chatId}`);
+        console.log(`User ${receiverId} accepted the video call from ${senderId}`);
 
-        const call = await videocallService.endVideoCall(chatId);
-        io.to(chatId).emit("callEnded", call);
+        const call = await videocallService.acceptVideoCall(chatId, senderId, receiverId);
 
-        console.log(`Video call ended for chat ${chatId}`);
+        io.to(chatId).emit("callAccepted", { call, message: `Video call started between ${senderId} and ${receiverId}` });
+
+        callback?.({ status: "active", call });
       } catch (error: any) {
-        console.error(`Error ending video call in chat ${chatId}: ${error.message}`);
-        socket.emit("errorEndingCall", error.message);
+        console.error(`Error accepting video call: ${error.message}`);
+        callback?.({ status: "error", message: error.message });
       }
+    });
+
+    socket.on("declineCall", async (chatId: string, receiverId: string, senderId: string, callback?: (response: any) => void) => {
+      try {
+        console.log(`User ${receiverId} declined the video call from ${senderId}`);
+
+        const call = await videocallService.declineVideoCall(chatId, senderId, receiverId);
+
+        io.to(chatId).emit("callDeclined", { call, message: `Video call declined by ${receiverId}` });
+
+        callback?.({ status: "missed", call });
+      } catch (error: any) {
+        console.error(`Error declining video call: ${error.message}`);
+        callback?.({ status: "error", message: error.message });
+      }
+    });
+    socket.on("endCall", async (chatId: string, senderId: string, receiverId: string, callback?: (response: any) => void) => {
+      try {
+        console.log(`User ${senderId} is ending the video call with user ${receiverId}`);
+
+        const call = await videocallService.endVideoCall(chatId, senderId, receiverId);
+
+        io.to(chatId).emit("callEnded", { call, message: `Video call ended between ${senderId} and ${receiverId}` });
+
+        callback?.({ status: "ended", call });
+      } catch (error: any) {
+        console.error(`Error ending video call: ${error.message}`);
+        callback?.({ status: "error", message: error.message });
+      }
+    });
+
+    socket.on("disconnect", () => {
+      console.log("User disconnected from video call", socket.id);
     });
   });
 };

@@ -3,7 +3,7 @@ import { messageSchema } from "../schemas/message.schema";
 
 const createMessage = async (chatId: string, senderId: string, content: string) => {
   const validationMessage = messageSchema.safeParse({ chat_id: chatId, sender_id: senderId, content });
-  if (!validationMessage.success) throw new Error(validationMessage.error.message);
+  if (!validationMessage.success) throw new Error(validationMessage.error.issues[0]?.message || "Validation error");
 
   const message = new Message({
     chat_id: chatId,

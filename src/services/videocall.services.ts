@@ -1,30 +1,61 @@
 import VideoCall from "../models/videocall.model";
 import { videoCallSchema } from "../schemas/videocall.schema";
 
-const startVideoCall = async (chatId: string) => {
+const requestVideoCall = async (chatId: string, senderId: string, receiverId: string) => {
   const validationVideoCall = videoCallSchema.safeParse({ chat_id: chatId });
   if (!validationVideoCall.success) throw new Error(validationVideoCall.error.message);
 
   const videoCall = new VideoCall({
     chat_id: chatId,
-    called: true,
-    startTime: new Date(),
-    callStatus: "active",
+    sender_id: senderId,
+    receiver_id: receiverId,
+    callStatus: "pending",
   });
 
   await videoCall.save();
   return videoCall;
 };
 
-const endVideoCall = async (chatId: string) => {
-  const videocall = await VideoCall.findByIdAndUpdate(
-    { chat_id: chatId, callStatus: "active" },
+const acceptVideoCall = async (chatId: string, senderId: string, receiverId: string) => {
+  const validationVideoCall = videoCallSchema.safeParse({ chat_id: chatId });
+  if (!validationVideoCall.success) throw new Error(validationVideoCall.error.message);
+
+  const videoCall = await VideoCall.findOneAndUpdate(
+    { chat_id: chatId, sender_id: senderId, receiver_id: receiverId, callStatus: "pending" },
+    { callStatus: "active", startTime: new Date() },
+    { new: true }
+  );
+
+  if (!videoCall) throw new Error("Pending video call not found");
+  return videoCall;
+};
+
+const declineVideoCall = async (chatId: string, senderId: string, receiverId: string) => {
+  const validationVideoCall = videoCallSchema.safeParse({ chat_id: chatId });
+  if (!validationVideoCall.success) throw new Error(validationVideoCall.error.message);
+
+  const videoCall = await VideoCall.findOneAndUpdate(
+    { chat_id: chatId, sender_id: senderId, receiver_id: receiverId, callStatus: "pending" },
+    { callStatus: "missed" },
+    { new: true }
+  );
+
+  if (!videoCall) throw new Error("Pending video call not found");
+  return videoCall;
+};
+
+const endVideoCall = async (chatId: string, senderId: string, receiverId: string) => {
+  const validationVideoCall = videoCallSchema.safeParse({ chat_id: chatId });
+  if (!validationVideoCall.success) throw new Error(validationVideoCall.error.message);
+
+  const videoCall = await VideoCall.findOneAndUpdate(
+    { chat_id: chatId, sender_id: senderId, receiver_id: receiverId, callStatus: "active" },
     { callStatus: "ended", endTime: new Date() },
     { new: true }
   );
 
-  if (!videocall) throw new Error("Active video call not found");
-  return videocall;
+  if (!videoCall) throw new Error("Active video call not found");
+  return videoCall;
 };
 
-export { startVideoCall, endVideoCall };
+export { requestVideoCall, acceptVideoCall, declineVideoCall, endVideoCall };

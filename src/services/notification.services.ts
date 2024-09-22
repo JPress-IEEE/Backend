@@ -7,9 +7,9 @@ export const createNotification = async (userId: string, message: string, status
     message,
     status,
     createdAt: new Date(),
-    updateAt: new Date(),
+    updatedAt: new Date(),
   });
-  if (!validationNotification.success) throw new Error(validationNotification.error.message);
+  if (!validationNotification.success) throw new Error(validationNotification.error.issues[0]?.message || "Invalid data");
 
   const notification = new Notification({
     userId,

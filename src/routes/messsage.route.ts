@@ -6,17 +6,17 @@ import {
   getMessageForChat,
   markMessageAsRead,
 } from "../controllers/message.controller";
-
+import { authMiddleware } from "../middlewares/auth.middleware";
 const router = Router();
 
-router.post("/messages", createMessage);
+router.post("/messages",authMiddleware, createMessage);
 
-router.get("/messages/:chatId", getMessageForChat);
+router.get("/messages/:chatId",authMiddleware, getMessageForChat);
 
-router.put("/messages/:messageId", editMessage);
+router.put("/messages/:messageId",authMiddleware, editMessage);
 
-router.delete("/messages/:messageId", deleteMessage);
+router.delete("/messages/:messageId",authMiddleware, deleteMessage);
 
-router.put("/messages/read/:messageId", markMessageAsRead);
+router.put("/messages/read/:messageId",authMiddleware, markMessageAsRead);
 
 export default router;

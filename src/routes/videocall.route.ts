@@ -1,10 +1,12 @@
 import { Router } from "express";
-import { endVideoCall } from "../controllers/videocall.controller";
-import { startVideoCall } from "../controllers/videocall.controller";
+import { acceptCall, declineCall, endVideoCall, requestCall } from "../controllers/videocall.controller";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-router.post("/videocall/start", startVideoCall);
-router.put("/videocall/end/:callId", endVideoCall);
+router.post("/request",authMiddleware, requestCall);
+router.post("/accept",authMiddleware, acceptCall);
+router.post("/decline",authMiddleware, declineCall);
+router.post("/end",authMiddleware, endVideoCall);
 
 export default router;

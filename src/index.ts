@@ -19,6 +19,15 @@ import { ErrorHandler } from './middlewares/generalErrorHandler';
 import dotenv from 'dotenv';
 import { Server } from 'socket.io';
 import { swaggerUi,swaggerDocs } from './swagger';
+
+import chatRouter from "./routes/chat.route"
+import messageRouter from "./routes/messsage.route"
+import videoCallRouter from "./routes/videocall.route"
+import notificationRouter from "./routes/notification.route"
+
+import { handleChatSockets } from "./sockets/chat.socket"
+import { handleVideoCallSockets } from "./sockets/videocall.socket"
+import { handleNotificationSocket } from "./sockets/notification.socket"
 dotenv.config();
 import cors from 'cors';
 
@@ -62,11 +71,22 @@ app.use('/api/offer', offerRouter);
 app.use('/api/recommendation', recommendationRouter);
 app.use('/api/feedback', feedbackRouter);
 
+app.use("/api/chats", chatRouter)
+app.use("/api/messages", messageRouter)
+app.use("/api/videoCalls", videoCallRouter)
+app.use("/api/notifications", notificationRouter)
 
 app.use(zodErrorHandler);
 app.use(multerErrorHandler);
 app.use(ErrorHandler);
 
+handleChatSockets(io)
+handleVideoCallSockets(io)
+handleNotificationSocket(io)
+
+io.on("connection", (socket) => {
+  console.log(`User connected: ${socket.id}`);
+});
 
 const serverListen = server.listen(process.env.PORT ||3000, () => {
     console.log('Server is running on port 3000');
