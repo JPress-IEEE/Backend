@@ -11,6 +11,7 @@ import requestRouter from './routes/request.route';
 import recommendationRouter from './routes/recommendation.route';
 import offerRouter from './routes/offer.route';
 import feedbackRouter from './routes/feedback.route';
+import bookmarkRouter from './routes/bookmark.route';
 import passport from './utils/passport.utils';
 import session from 'express-session';
 import { zodErrorHandler } from './middlewares/zodErrorHandler';
@@ -70,6 +71,7 @@ app.use('/api/request', requestRouter);
 app.use('/api/offer', offerRouter);
 app.use('/api/recommendation', recommendationRouter);
 app.use('/api/feedback', feedbackRouter);
+app.use('/api/bookmark', bookmarkRouter);
 
 app.use("/api/chats", chatRouter)
 app.use("/api/messages", messageRouter)
@@ -89,7 +91,7 @@ io.on("connection", (socket) => {
 });
 
 const serverListen = server.listen(process.env.PORT ||3000, () => {
-    console.log('Server is running on port ${process.env.PORT}');
+    console.log('Server is running on port', process.env.PORT);
 });
 
 export { io }
