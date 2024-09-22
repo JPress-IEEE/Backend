@@ -10,6 +10,8 @@ Welcome to the JPress repository! This project provides backend services for a j
 - **Service Requests & Offers**: Clients post requests and view offers from applicants.
 - **Recommendations**: Suggest applicants based on requests.
 - **Feedback System**: Clients rate and review service providers.
+- **Bookmarks**: Allow users to bookmark offers they are interested in to revisit them later.
+- **Translation**:The translation feature allows translation from various languages to English
 
 ## Technology Stack
 
