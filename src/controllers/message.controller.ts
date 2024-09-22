@@ -12,7 +12,6 @@ const createMessage = async (req: Request, res: Response, next: NextFunction) =>
     const message = await messageService.createMessage(chatId, senderId, content);
     res.status(201).json(message);
   } catch (error: any) {
-    // res.status(400).json({ message: error.message });
     next(error);
   }
 };
@@ -23,7 +22,6 @@ const getMessageForChat = async (req: Request, res: Response, next: NextFunction
     const message = await messageService.getMessageForChat(chatId);
     res.status(200).json(message);
   } catch (error: any) {
-    // res.status(404).json({ message: error.message });
     next(error);
   }
 };
@@ -36,7 +34,6 @@ const editMessage = async (req: Request, res: Response, next: NextFunction) => {
     if (!message) return res.status(404).json({ message: "Message not found" });
     res.status(200).json(message);
   } catch (error: any) {
-    // res.status(400).json({ message: error.message });
     next(error);
   }
 };
@@ -48,7 +45,6 @@ const deleteMessage = async (req: Request, res: Response, next: NextFunction) =>
     if (!message) return res.status(404).json({ message: "Message not found" });
     res.status(204).json({ message: `${messageId} message is removed` });
   } catch (error: any) {
-    // res.status(400).json({ message: error.message });
     next(error);
   }
 };
@@ -60,7 +56,6 @@ const markMessageAsRead = async (req: Request, res: Response, next: NextFunction
     if (!message) return res.status(404).json({ message: "Message not found" });
     res.status(200).json(message);
   } catch (error: any) {
-    // res.status(400).json({ message: error.message });
     next(error);
   }
 };
