@@ -12,7 +12,6 @@ const createChat = async (req: Request, res: Response, next: NextFunction) => {
     const chat = await chatService.createChat(participant1_id, participant2_id);
     res.status(201).json(chat);
   } catch (error: any) {
-    // res.status(400).json({ message: error.message });
     next(error);
   }
 };
@@ -28,7 +27,6 @@ const getChatMessages = async (req: Request, res: Response, next: NextFunction) 
 
     res.status(200).json(messages);
   } catch (error: any) {
-    // res.status(400).json({ message: error.message });
     next(error);
   }
 };
