@@ -36,7 +36,7 @@ export const createUserController = async (req: Request, res: Response , next:Ne
         const emailText = `Click this link to confirm your email: ${url}`;
         await sendEmail(validatedData.email, 'Confirm Email', emailText);
 
-        return res.status(201).send({ message: 'User created successfully', accessToken });
+        return res.status(201).send({ message: 'User created successfully', accessToken , refreshToken, userId });
     } catch (err: any) {
         next(err);
     }
