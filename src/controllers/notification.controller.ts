@@ -20,7 +20,6 @@ export const createNotification = async (req: Request, res: Response, next: Next
     const notification = await notificationService.createNotification(userId, message, status);
     res.status(201).json(notification);
   } catch (error: any) {
-    // res.status(400).json({ message: error.message });
     if (error instanceof Error) {
       return res.status(500).json({ message: error.message });
     }
@@ -29,13 +28,12 @@ export const createNotification = async (req: Request, res: Response, next: Next
 };
 export const getNotification = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { userId } = req.query as { userId: string }; // Assume userId comes from query
+    const { userId } = req.query as { userId: string }; 
 
     const notifications = await notificationService.getNotification(userId);
 
     res.status(200).json(notifications);
   } catch (error: any) {
-    // res.status(404).json({ message: error.message });
     if (error instanceof Error) {
       return res.status(500).json({ message: error.message });
     }
@@ -53,7 +51,6 @@ export const updateNotification = async (req: Request, res: Response, next: Next
 
     res.status(200).json(notification);
   } catch (error: any) {
-    // res.status(400).json({ message: error.message });
     if (error instanceof Error) {
       return res.status(500).json({ message: error.message });
     }
@@ -70,7 +67,6 @@ export const deleteNotification = async (req: Request, res: Response, next: Next
 
     res.status(204).send();
   } catch (error: any) {
-    // res.status(400).json({ message: error.message });
     if (error instanceof Error) {
       return res.status(500).json({ message: error.message });
     }

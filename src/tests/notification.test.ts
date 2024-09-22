@@ -4,7 +4,11 @@ import notificationRouter from "../routes/notification.route";
 import * as notificationService from "../services/notification.services";
 import { NotificationSchema } from "../schemas/notification.schema";
 import { ErrorHandler } from "../middlewares/generalErrorHandler";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
+jest.mock("../middlewares/auth.middleware", () => ({
+  authMiddleware: jest.fn(),
+}));
 jest.mock("../services/notification.services", () => ({
   createNotification: jest.fn(),
   getNotification: jest.fn(),
@@ -26,6 +30,7 @@ app.use(ErrorHandler);
 describe("Notification Routes", () => {
   describe("POST /api/notifications/create", () => {
     it("should create a notification", async () => {
+      (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
       const mockNotification = { _id: "notif1", userId: "user1", message: "New message", status: "unread" };
       (NotificationSchema.safeParse as jest.Mock).mockReturnValue({ success: true });
       (notificationService.createNotification as jest.Mock).mockResolvedValue(mockNotification);
@@ -41,6 +46,7 @@ describe("Notification Routes", () => {
     });
 
     it("should return 400 for invalid input", async () => {
+      (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
       (NotificationSchema.safeParse as jest.Mock).mockReturnValue({
         success: false,
         error: { issues: [{ message: "Invalid data" }] },
@@ -53,6 +59,7 @@ describe("Notification Routes", () => {
     });
 
     it("should handle service errors gracefully", async () => {
+      (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
       (NotificationSchema.safeParse as jest.Mock).mockReturnValue({ success: true });
       (notificationService.createNotification as jest.Mock).mockRejectedValue(new Error("Internal server error"));
 
@@ -70,6 +77,7 @@ describe("Notification Routes", () => {
 
   describe("GET /api/notifications/get", () => {
     it("should get notifications for a user", async () => {
+      (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
       const mockNotifications = [{ _id: "notif1", userId: "user1", message: "New message", status: "unread" }];
       (notificationService.getNotification as jest.Mock).mockResolvedValue(mockNotifications);
 
@@ -80,6 +88,7 @@ describe("Notification Routes", () => {
     });
 
     it("should return an empty array if no notifications are found", async () => {
+      (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
       (notificationService.getNotification as jest.Mock).mockResolvedValue([]);
 
       const res = await request(app).get("/api/notifications/get").query({ userId: "user1" });
@@ -89,6 +98,7 @@ describe("Notification Routes", () => {
     });
 
     it("should handle service errors gracefully", async () => {
+      (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
       (notificationService.getNotification as jest.Mock).mockRejectedValue(new Error("Internal server error"));
 
       const res = await request(app).get("/api/notifications/get").query({ userId: "user1" });
@@ -100,6 +110,7 @@ describe("Notification Routes", () => {
 
   describe("PUT /api/notifications/update", () => {
     it("should update a notification's status", async () => {
+      (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
       const mockNotification = { _id: "notif1", status: "read" };
       (notificationService.updateNotification as jest.Mock).mockResolvedValue(mockNotification);
 
@@ -110,6 +121,7 @@ describe("Notification Routes", () => {
     });
 
     it("should return 404 if notification is not found", async () => {
+      (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
       (notificationService.updateNotification as jest.Mock).mockResolvedValue(null);
 
       const res = await request(app).put("/api/notifications/update").send({ notificationId: "notif1", status: "read" });
@@ -119,6 +131,7 @@ describe("Notification Routes", () => {
     });
 
     it("should handle service errors gracefully", async () => {
+      (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
       (notificationService.updateNotification as jest.Mock).mockRejectedValue(new Error("Internal server error"));
 
       const res = await request(app).put("/api/notifications/update").send({ notificationId: "notif1", status: "read" });
@@ -130,6 +143,7 @@ describe("Notification Routes", () => {
 
   describe("DELETE /api/notifications/delete", () => {
     it("should delete a notification", async () => {
+      (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
       (notificationService.deleteNotification as jest.Mock).mockResolvedValue(true);
 
       const res = await request(app).delete("/api/notifications/delete").send({ notificationId: "notif1" });
@@ -138,6 +152,7 @@ describe("Notification Routes", () => {
     });
 
     it("should return 404 if notification is not found", async () => {
+      (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
       (notificationService.deleteNotification as jest.Mock).mockResolvedValue(null);
 
       const res = await request(app).delete("/api/notifications/delete").send({ notificationId: "notif1" });
@@ -147,6 +162,7 @@ describe("Notification Routes", () => {
     });
 
     it("should handle service errors gracefully", async () => {
+      (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
       (notificationService.deleteNotification as jest.Mock).mockRejectedValue(new Error("Internal server error"));
 
       const res = await request(app).delete("/api/notifications/delete").send({ notificationId: "notif1" });
