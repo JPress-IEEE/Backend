@@ -36,9 +36,3 @@ export const deleteNotification = async (notificationId: string) => {
 
   return notification;
 };
-// export const validateNotification = (notification: any) => {};
-// export const validateNotificationId = (notificationId: string) => {};
-// export const validateNotificationUpdate = (notification: any) => {};
-// export const validateNotificationDelete = (notificationId: string) => {};
-// export const validateNotificationGet = (userId: string) => {};
-// export const validateNotificationCreate = (notification: any) => {};
