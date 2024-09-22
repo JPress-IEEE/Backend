@@ -73,7 +73,7 @@ app.use('/api/feedback', feedbackRouter);
 
 app.use("/api/chats", chatRouter)
 app.use("/api/messages", messageRouter)
-app.use("/api/videoCalls", videoCallRouter)
+app.use("/api/video-calls", videoCallRouter)
 app.use("/api/notifications", notificationRouter)
 
 app.use(zodErrorHandler);
@@ -89,7 +89,7 @@ io.on("connection", (socket) => {
 });
 
 const serverListen = server.listen(process.env.PORT ||3000, () => {
-    console.log('Server is running on port 3000');
+    console.log('Server is running on port ${process.env.PORT}');
 });
 
 export { io }
