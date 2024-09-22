@@ -3,7 +3,7 @@ import { videoCallSchema } from "../schemas/videocall.schema";
 
 const requestVideoCall = async (chatId: string, senderId: string, receiverId: string) => {
   const validationVideoCall = videoCallSchema.safeParse({ chat_id: chatId });
-  if (!validationVideoCall.success) throw new Error(validationVideoCall.error.message);
+  if (!validationVideoCall.success) throw new Error(validationVideoCall.error.issues[0]?.message);
 
   const videoCall = new VideoCall({
     chat_id: chatId,
@@ -18,7 +18,7 @@ const requestVideoCall = async (chatId: string, senderId: string, receiverId: st
 
 const acceptVideoCall = async (chatId: string, senderId: string, receiverId: string) => {
   const validationVideoCall = videoCallSchema.safeParse({ chat_id: chatId });
-  if (!validationVideoCall.success) throw new Error(validationVideoCall.error.message);
+  if (!validationVideoCall.success) throw new Error(validationVideoCall.error.issues[0]?.message);
 
   const videoCall = await VideoCall.findOneAndUpdate(
     { chat_id: chatId, sender_id: senderId, receiver_id: receiverId, callStatus: "pending" },
@@ -32,7 +32,7 @@ const acceptVideoCall = async (chatId: string, senderId: string, receiverId: str
 
 const declineVideoCall = async (chatId: string, senderId: string, receiverId: string) => {
   const validationVideoCall = videoCallSchema.safeParse({ chat_id: chatId });
-  if (!validationVideoCall.success) throw new Error(validationVideoCall.error.message);
+  if (!validationVideoCall.success) throw new Error(validationVideoCall.error.issues[0]?.message);
 
   const videoCall = await VideoCall.findOneAndUpdate(
     { chat_id: chatId, sender_id: senderId, receiver_id: receiverId, callStatus: "pending" },
@@ -46,7 +46,7 @@ const declineVideoCall = async (chatId: string, senderId: string, receiverId: st
 
 const endVideoCall = async (chatId: string, senderId: string, receiverId: string) => {
   const validationVideoCall = videoCallSchema.safeParse({ chat_id: chatId });
-  if (!validationVideoCall.success) throw new Error(validationVideoCall.error.message);
+  if (!validationVideoCall.success) throw new Error(validationVideoCall.error.issues[0]?.message);
 
   const videoCall = await VideoCall.findOneAndUpdate(
     { chat_id: chatId, sender_id: senderId, receiver_id: receiverId, callStatus: "active" },
