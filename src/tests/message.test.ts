@@ -41,7 +41,7 @@ describe("Message Routes", () => {
       (messageSchema.safeParse as jest.Mock).mockReturnValue({ success: true, data: mockMessage });
       (messageService.createMessage as jest.Mock).mockResolvedValue(mockMessage);
 
-      const res = await request(app).post("/api/messages/messages").send({ chatId: "123", senderId: "user1", content: "Hello" });
+      const res = await request(app).post("/api/messages").send({ chatId: "123", senderId: "user1", content: "Hello" });
 
       expect(res.status).toBe(201);
       expect(res.body).toEqual(mockMessage);
@@ -54,7 +54,7 @@ describe("Message Routes", () => {
         error: { issues: [{ message: "Content cannot be empty" }] },
       });
 
-      const res = await request(app).post("/api/messages/messages").send({ chatId: "123", senderId: "user1", content: "" });
+      const res = await request(app).post("/api/messages").send({ chatId: "123", senderId: "user1", content: "" });
 
       expect(res.status).toBe(400);
       expect(res.body).toEqual({ message: "Content cannot be empty" });
@@ -65,7 +65,7 @@ describe("Message Routes", () => {
       (messageSchema.safeParse as jest.Mock).mockReturnValue({ success: true });
       (messageService.createMessage as jest.Mock).mockRejectedValue(new Error("Internal server error"));
 
-      const res = await request(app).post("/api/messages/messages").send({ chatId: "123", senderId: "user1", content: "Hello" });
+      const res = await request(app).post("/api/messages").send({ chatId: "123", senderId: "user1", content: "Hello" });
 
       expect(messageService.createMessage).toHaveBeenCalledWith("123", "user1", "Hello");
       expect(res.status).toBe(500);
@@ -79,7 +79,7 @@ describe("Message Routes", () => {
       const mockMessage = { _id: "msg1", content: "Updated content" };
       (messageService.editMessage as jest.Mock).mockResolvedValue(mockMessage);
 
-      const res = await request(app).put("/api/messages/messages/msg1").send({ newContent: "Updated content" });
+      const res = await request(app).put("/api/messages/msg1").send({ newContent: "Updated content" });
 
       expect(res.status).toBe(200);
       expect(res.body).toEqual(mockMessage);
@@ -89,7 +89,7 @@ describe("Message Routes", () => {
       (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
       (messageService.editMessage as jest.Mock).mockResolvedValue(null);
 
-      const res = await request(app).put("/api/messages/messages/msg1").send({ newContent: "Updated content" });
+      const res = await request(app).put("/api/messages/msg1").send({ newContent: "Updated content" });
 
       expect(res.status).toBe(404);
       expect(res.body).toEqual({ message: "Message not found" });
@@ -99,7 +99,7 @@ describe("Message Routes", () => {
       (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
       (messageService.editMessage as jest.Mock).mockRejectedValue(new Error("Internal server error"));
 
-      const res = await request(app).put("/api/messages/messages/msg1").send({ newContent: "Updated content" });
+      const res = await request(app).put("/api/messages/msg1").send({ newContent: "Updated content" });
 
       expect(res.status).toBe(500);
       expect(res.body).toEqual({ message: "Internal server error" });
@@ -111,7 +111,7 @@ describe("Message Routes", () => {
       (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
       (messageService.deleteMessage as jest.Mock).mockResolvedValue(true);
 
-      const res = await request(app).delete("/api/messages/messages/msg1");
+      const res = await request(app).delete("/api/messages/msg1");
 
       expect(res.status).toBe(204);
     });
@@ -120,7 +120,7 @@ describe("Message Routes", () => {
       (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
       (messageService.deleteMessage as jest.Mock).mockResolvedValue(null);
 
-      const res = await request(app).delete("/api/messages/messages/msg1");
+      const res = await request(app).delete("/api/messages/msg1");
 
       expect(res.status).toBe(404);
       expect(res.body).toEqual({ message: "Message not found" });
@@ -130,7 +130,7 @@ describe("Message Routes", () => {
       (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
       (messageService.deleteMessage as jest.Mock).mockRejectedValue(new Error("Internal server error"));
 
-      const res = await request(app).delete("/api/messages/messages/msg1");
+      const res = await request(app).delete("/api/messages/msg1");
 
       expect(res.status).toBe(500);
       expect(res.body).toEqual({ message: "Internal server error" });
@@ -143,7 +143,7 @@ describe("Message Routes", () => {
       const mockMessage = { _id: "msg1", isRead: true };
       (messageService.markMessageAsRead as jest.Mock).mockResolvedValue(mockMessage);
 
-      const res = await request(app).put("/api/messages/messages/read/msg1");
+      const res = await request(app).put("/api/messages/read/msg1");
 
       expect(res.status).toBe(200);
       expect(res.body).toEqual(mockMessage);
@@ -153,7 +153,7 @@ describe("Message Routes", () => {
       (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
       (messageService.markMessageAsRead as jest.Mock).mockResolvedValue(null);
 
-      const res = await request(app).put("/api/messages/messages/read/msg1");
+      const res = await request(app).put("/api/messages/read/msg1");
 
       expect(res.status).toBe(404);
       expect(res.body).toEqual({ message: "Message not found" });
@@ -163,7 +163,7 @@ describe("Message Routes", () => {
       (authMiddleware as jest.Mock).mockImplementation((req, res, next) => next());
       (messageService.markMessageAsRead as jest.Mock).mockRejectedValue(new Error("Internal server error"));
 
-      const res = await request(app).put("/api/messages/messages/read/msg1");
+      const res = await request(app).put("/api/messages/read/msg1");
 
       expect(res.status).toBe(500);
       expect(res.body).toEqual({ message: "Internal server error" });
