@@ -1,5 +1,7 @@
 import swaggerJsDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const swaggerOptions: swaggerJsDoc.Options = {
     swaggerDefinition: {
@@ -10,7 +12,7 @@ const swaggerOptions: swaggerJsDoc.Options = {
         },
         servers: [
             {
-                url: 'http://localhost:3000',
+                url: 'http://localhost:${process.env.PORT}',
             },
         ],
         components: {
@@ -90,6 +92,7 @@ const swaggerOptions: swaggerJsDoc.Options = {
                         _id: { type: 'string' },
                         applicantId: { type: 'string' },
                         clientId: { type: 'string' },
+                        offerId: { type: 'string' },
                         rate: { type: 'number' },
                         comment: { type: 'string' },
                         createdAt: { type: 'string', format: 'date-time' },
@@ -152,7 +155,7 @@ const swaggerOptions: swaggerJsDoc.Options = {
                     properties: {
                         _id: { type: 'string' },
                         requestId: { type: 'string' },
-                        applicantS:{
+                        applicants:{
                             type: 'array',
                             items: {
                                 type: 'string'

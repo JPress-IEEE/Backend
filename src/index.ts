@@ -10,6 +10,7 @@ import clientRouter from './routes/client.route';
 import requestRouter from './routes/request.route';
 import recommendationRouter from './routes/recommendation.route';
 import offerRouter from './routes/offer.route';
+import feedbackRouter from './routes/feedback.route';
 import passport from './utils/passport.utils';
 import session from 'express-session';
 import { zodErrorHandler } from './middlewares/zodErrorHandler';
@@ -28,11 +29,18 @@ import { handleChatSockets } from "./sockets/chat.socket"
 import { handleVideoCallSockets } from "./sockets/videocall.socket"
 import { handleNotificationSocket } from "./sockets/notification.socket"
 dotenv.config();
+import cors from 'cors';
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 dbConnect();
+
+app.use(cors({
+    origin: 'http://localhost:5173', 
+    credentials: true 
+}));
+
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -61,6 +69,7 @@ app.use('/api/client', clientRouter);
 app.use('/api/request', requestRouter);
 app.use('/api/offer', offerRouter);
 app.use('/api/recommendation', recommendationRouter);
+app.use('/api/feedback', feedbackRouter);
 
 app.use("/api/chats", chatRouter)
 app.use("/api/messages", messageRouter)
