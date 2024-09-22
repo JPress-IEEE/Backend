@@ -12,7 +12,6 @@ const requestCall = async (req: Request, res: Response, next: NextFunction) => {
     const call = await videoCallService.requestVideoCall(chatId, senderId, receiverId);
     res.status(201).json(call);
   } catch (error: any) {
-    // res.status(500).json({ message: error.message });
     next(error)
   }
 };
@@ -28,7 +27,6 @@ const acceptCall = async (req: Request, res: Response, next: NextFunction) => {
     const call = await videoCallService.acceptVideoCall(chatId, senderId, receiverId);
     res.status(200).json(call);
   } catch (error: any) {
-    // res.status(500).json({ message: error.message });
     next(error)
   }
 };
@@ -44,7 +42,6 @@ const declineCall = async (req: Request, res: Response, next: NextFunction) => {
     const call = await videoCallService.declineVideoCall(chatId, senderId, receiverId);
     res.status(200).json(call);
   } catch (error: any) {
-    // res.status(500).json({ message: error.message });
     next(error)
   }
 };
@@ -60,7 +57,6 @@ const endVideoCall = async (req: Request, res: Response, next: NextFunction) => 
     const call = await videoCallService.endVideoCall(chatId, senderId, receiverId);
     res.status(200).json(call);
   } catch (error: any) {
-    // res.status(500).json({ message: error.message });
     next(error)
   }
 };
