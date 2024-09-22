@@ -61,6 +61,7 @@ Welcome to the JPress repository! This project provides backend services for a j
     EMAIL_PASS=
     EMAIL_SECRET=
     SESSION_SECRET=
+    APP_NAME=
     ```
 
 4. **Build and Start the Server**:
