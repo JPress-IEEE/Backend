@@ -53,6 +53,12 @@ import passport from 'passport';
  *                 accessToken:
  *                   type: string
  *                   example: SomeAccessToken123
+ *                 refreshToken:
+ *                   type: string
+ *                   example: SomeRefreshToken123
+ *                 userId:
+ *                   type: string
+ *                   example: 66ece1812a157969f61eb8f9
  *       400:
  *         description: Bad request
  *         content:
@@ -63,7 +69,6 @@ import passport from 'passport';
  *                 message:
  *                   type: string
  *                   example: User already exists
- * 
  * /api/auth/login:
  *   post:
  *     summary: Log in a user
